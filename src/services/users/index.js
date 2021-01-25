@@ -52,4 +52,24 @@ userRoutes.put("/:id", async (req, res, next) => {
     next(error);
   }
 });
+
+//POST //api/users
+//REGISTER A USER
+userRoutes.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    if (id === "all") {
+      await User.deleteMany();
+      res.status(200).send("deleted all");
+    } else {
+      const { _id } = await User.findByIdAndDelete(id);
+      res.status(200).send({ _id });
+    }
+  } catch (err) {
+    console.log(err);
+    const error = new Error("It was not possible to register a new user");
+    error.code = "400";
+    next(error);
+  }
+});
 module.exports = userRoutes;
