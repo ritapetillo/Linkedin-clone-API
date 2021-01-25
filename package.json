@@ -26,6 +26,7 @@
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.13",
+    "mongoose-csv": "^1.1.0",
     "multer": "^1.4.2",
     "multer-storage-cloudinary": "^4.0.0",
     "node-error-handler": "^1.1.14",

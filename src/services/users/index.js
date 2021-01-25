@@ -2,6 +2,7 @@ const express = require("express");
 const userRoutes = express.Router();
 const User = require("../../models/User");
 const sendEmail = require("../../lib/utils/email");
+const parser = require("../../lib/utils/cloudinary");
 
 //GET //api/users
 //GET ALL USERS
@@ -34,6 +35,34 @@ userRoutes.post("/", async (req, res, next) => {
     next(error);
   }
 });
+
+//POST //api/users
+//REGISTER A USER
+userRoutes.post(
+  "/:id/upload",
+  parser.single("image"),
+  async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const image = req.file && req.file.path; // add the single
+      const editedUser = await User.findByIdAndUpdate(
+        id,
+        { $set: { image } },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      res.status(200).send({ editedUser });
+    } catch (err) {
+      console.log(err);
+      const error = new Error("It was not possible to register a new user");
+      error.code = "400";
+      next(error);
+    }
+  }
+);
+module.exports = userRoutes;
 
 //POST //api/users
 //REGISTER A USER
