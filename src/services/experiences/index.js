@@ -20,7 +20,7 @@ experiencesRouter.get("/", async (req, res, next) => {
 experiencesRouter.get("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
-    const response = await ExperienceModel.findOne(experienceId);
+    const response = await ExperienceModel.findById(experienceId);
     if (response == null) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
@@ -32,37 +32,19 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   }
 });
 
-experiencesRouter.get("/CSV", async (req, res, next) => {
+
+experiencesRouter.get("/csv", async (req, res, next) => {
   try {
-    ExperienceModel.plugin(mongoose_csv);
+    res.writeHead(200, {
+      "Content-Type": "text/csv",
+      "Content-Disposition": "attachment; filename=expereinces.csv",
+    });
+    const experiences = await ExperienceModel.find().csv(res);
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
-
-// experiencesRouter.get("/CSV", async (req, res, next) => {
-//     const fields = [
-//       "Role",
-//       "Company",
-//       "Description",
-//       "Start Date",
-//       "End Date",
-//       "Area",
-//       "Image",
-//       "Username",
-//     ];
-//     const opts = { fields };
-//     const experiences = ExperienceModel.find().toObject();
-//     try {
-//       const parser = new Parser(opts);
-//       const csv = parser.parse(experiences);
-//       console.log(csv);
-//     } catch (error) {
-//       console.log(error);
-//       next(error);
-//     }
-//   });
 
 experiencesRouter.post(
   "/:userId",
