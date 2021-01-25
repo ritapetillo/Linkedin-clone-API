@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
+const mongoose_csv = require("mongoose-csv");
 
 const UserSchema = new Schema(
   {
@@ -15,7 +16,7 @@ const UserSchema = new Schema(
     username: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     password: {
       type: String,
@@ -25,7 +26,6 @@ const UserSchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true
     },
     bio: {
       type: String,
@@ -41,6 +41,7 @@ const UserSchema = new Schema(
     image: {
       type: String,
     },
+    experiences: [{ type: mongoose.Schema.Types.ObjectId, ref: "Experience" }],
   },
   { timestamps: true }
 );
@@ -55,6 +56,8 @@ UserSchema.pre("save", async function (next) {
     next(error);
   }
 });
+
+UserSchema.plugin(mongoose_csv);
 // UserSchema.pre("findByIdAndUpdate", function () {
 //   this.setOptions({ new: true });
 // });

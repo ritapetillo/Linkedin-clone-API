@@ -10,13 +10,23 @@ const schemas = {
   loginSchema: Joi.object().keys({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
+  
   }),
   commentSchema: Joi.object().keys({
     text: Joi.string().required()
+  }),
+  experienceSchema: Joi.object().keys({
+    role: Joi.string().required(),
+    company: Joi.string().required(),
+    description: Joi.string().required(),
+    startDate: Joi.date().required(),
+    endDate: Joi.date(),
+    area: Joi.string().required(),
+    image: Joi.string(),
+    username: Joi.string().required(),
   })
 };
 
-   
 
 
 module.exports = schemas
