@@ -11,6 +11,9 @@ const schemas = {
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
   }),
+  commentSchema: Joi.object().keys({
+    text: Joi.string().required()
+  })
 };
 
    
