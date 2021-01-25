@@ -7,6 +7,7 @@ const apiRoutes = require("./services");
 const mongoose = require("mongoose");
 const listEndpoints = require("express-list-endpoints")
 
+
 //MIDDLEWARES
 server.use(express.json());
 server.use(cors());
