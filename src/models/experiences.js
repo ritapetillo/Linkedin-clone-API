@@ -32,7 +32,7 @@ const ExperienceSchema = new Schema(
     },
     image: {
       type: String,
-      required: true,
+      required: false,
     },
   },
   {
@@ -41,10 +41,10 @@ const ExperienceSchema = new Schema(
   }
 );
 
-ExperienceSchema.static("findExperiencesWithUser", async function (id) {
-  const book = await ExperienceModel.findById(id).populate("users");
-  return book;
-});
+// ExperienceSchema.static("findExperiencesWithUser", async function (id) {
+//   const book = await ExperienceModel.findById(id).populate("users");
+//   return book;
+// });
 
 const ExperienceModel = model("Experience", ExperienceSchema);
 module.exports = ExperienceModel;

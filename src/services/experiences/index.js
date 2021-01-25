@@ -1,35 +1,37 @@
 const express = require("express");
-const q2m = require("query-to-mongo");
-const ExperienceModel = require("../../models/experiences");
+const ExperienceModel = require("../../models/Experiences");
 const ApiError = require("../../classes/apiError");
 const experiencesRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
+// const UserModel = require("../../models/User");
+const multer = require("multer");
+const cloudinary = require("../cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const { Parser } = require("json2csv");
 
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "experiences",
+  },
+});
+const cloudinaryMulter = multer({ storage: storage });
 
-
-experiencesRouter.get("/", (schemas, validationMiddleware), async (req, res, next) => {
+experiencesRouter.get("/", async (req, res, next) => {
   try {
-    const query = q2m(req.query);
-    const total = await ExperienceModel.countDocuments(query.criteria);
-    const experiences = await ExperienceModel.find(query.criteria)
-      .sort(query.options.sort)
-      .skip(query.options.skip)
-      .limit(query.options.limit)
-      .populate("users");
-    res.send({ links: query.links("/experiences", total), experiences });
+    const experiences = await ExperienceModel.find();
+    res.send(experiences);
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
-experiencesRouter.get("/:experienceId",(schemas, validationMiddleware), async (req, res, next) => {
+
+experiencesRouter.get("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
-    const response = await ExperienceModel.findExperiencesWithUser(
-      experienceId
-    );
-    // const response = await ExperienceModel.findById(experienceId).populate("users")
+    const response = await ExperienceModel.findOne(experienceId);
     if (response == null) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
@@ -41,41 +43,108 @@ experiencesRouter.get("/:experienceId",(schemas, validationMiddleware), async (r
   }
 });
 
-experiencesRouter.post("/", (schemas, validationMiddleware), async (req, res, next) => {
+experiencesRouter.get("/CSV", async (req, res, next) => {
+  const fields = [
+    "Role",
+    "Company",
+    "Description",
+    "Start Date",
+    "End Date",
+    "Area",
+    "Image",
+    "Username",
+  ];
+  const opts = { fields };
+  const experiences = ExperienceModel.find().toObject();
   try {
-    const newExperiences = new ExperienceModel(req.body);
-    const { _id } = await newExperiences.save();
-    res.status(201).json({ data: `Experience with ${_id} added` });
+    const parser = new Parser(opts);
+    const csv = parser.parse(experiences);
+    console.log(csv);
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
 
-experiencesRouter.put("/:experienceId", (schemas, validationMiddleware), async (req, res, next) => {
-  const { experienceId } = req.params;
-  try {
-    const experience = await ExperienceModel.findByIdAndUpdate(
-      experienceId,
-      req.body
-    );
-    if (experience) {
-      res.status(201).json({ data: `Experience with ID ${_id} updated` });
-    } else {
-      throw new ApiError(404, `No experience with ID ${experienceId} found`);
+experiencesRouter.post(
+  "/:userId",
+  validationMiddleware(schemas.experienceSchema),
+  async (req, res, next) => {
+    try {
+      const newExperiences = new ExperienceModel(req.body);
+      const { _id } = await newExperiences.save();
+      const { userId } = req.params;
+      const response = await UserModel.findOne(userId);
+      if (response) {
+        const user = await UserModel.findByIdAndUpdate(userId, {
+          $push: { experiences: _id },
+        });
+      } else {
+        throw new ApiError(404, `No User ID ${userId} found`);
+      }
+      res
+        .status(201)
+        .json({ data: `Experience with ${_id} added to user ${userId}` });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
-    next(error);
   }
-});
+);
 
-experiencesRouter.delete("/:experienceId", (schemas, validationMiddleware), async (req, res, next) => {
+experiencesRouter.post(
+  "/:experienceId/picture",
+  cloudinaryMulter.single("image"),
+  async (req, res, next) => {
+    const { experienceId } = req.params;
+    try {
+      const image = req.file && req.file.path;
+      const updateExperience = await ExperienceModel.findByIdAndUpdate(
+        experienceId,
+        { $push: { image } }
+      );
+      res
+        .status(201)
+        .json({ data: `Photo added to Experience with ID ${experienceId}` });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+experiencesRouter.put(
+  "/:experienceId",
+  validationMiddleware(schemas.experienceSchema),
+  async (req, res, next) => {
+    const { experienceId } = req.params;
+    try {
+      const experience = await ExperienceModel.findByIdAndUpdate(
+        experienceId,
+        req.body
+      );
+      if (experience) {
+        res
+          .status(201)
+          .json({ data: `Experience with ID ${experienceId} updated` });
+      } else {
+        throw new ApiError(404, `No experience with ID ${experienceId} found`);
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+experiencesRouter.delete("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
     const experience = await ExperienceModel.findByIdAndDelete(experienceId);
     if (experience) {
-      res.status(201).json({ data: `Experience with ID ${_id} deleted` });
+      res
+        .status(201)
+        .json({ data: `Experience with ID ${experienceId} deleted` });
     } else {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     }
@@ -85,5 +154,4 @@ experiencesRouter.delete("/:experienceId", (schemas, validationMiddleware), asyn
   }
 });
 
-
-module.exports = experiencesRouter
+module.exports = experiencesRouter;
