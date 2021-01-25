@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
+var mongoose_csv = require("mongoose-csv");
 
 const UserSchema = new Schema(
   {
@@ -58,6 +59,8 @@ UserSchema.pre("save", async function (next) {
     next(error);
   }
 });
+
+UserSchema.plugin(mongoose_csv)
 // UserSchema.pre("findByIdAndUpdate", function () {
 //   this.setOptions({ new: true });
 // });

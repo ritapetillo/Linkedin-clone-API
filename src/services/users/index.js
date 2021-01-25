@@ -17,6 +17,22 @@ userRoutes.get("/", async (req, res, next) => {
     next(error);
   }
 });
+//GET //api/users
+//GET ALL USERS
+userRoutes.get("/csv", async (req, res, next) => {
+  try {
+    res.writeHead(200, {
+      "Content-Type": "text/csv",
+      "Content-Disposition": "attachment; filename=users.csv",
+    });
+    const users = await User.find().csv(res);
+    //   .select("-_id");
+  } catch (err) {
+    const error = new Error("There are no users");
+    error.code = "400";
+    next(error);
+  }
+});
 
 //POST //api/users
 //REGISTER A USER
