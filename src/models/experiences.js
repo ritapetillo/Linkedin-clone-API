@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const mongoose_csv = require("mongoose-csv");
 
 const ExperienceSchema = new Schema(
   {
@@ -29,6 +30,7 @@ const ExperienceSchema = new Schema(
     username: {
       type: String,
       required: true,
+      unique: true,
     },
     image: {
       type: String,
@@ -40,6 +42,7 @@ const ExperienceSchema = new Schema(
     required: false,
   }
 );
+ExperienceSchema.plugin(mongoose_csv);
 
 // ExperienceSchema.static("findExperiencesWithUser", async function (id) {
 //   const book = await ExperienceModel.findById(id).populate("users");
