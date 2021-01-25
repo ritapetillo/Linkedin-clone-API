@@ -8,6 +8,7 @@ const validationMiddleware = require("../../lib/validation/validationMiddleware"
 const multer = require("multer");
 const cloudinary = require("../cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const mongoose_csv = require("mongoose-csv");
 const { Parser } = require("json2csv");
 
 const storage = new CloudinaryStorage({
@@ -31,7 +32,7 @@ experiencesRouter.get("/", async (req, res, next) => {
 experiencesRouter.get("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
-    const response = await ExperienceModel.findOne(experienceId);
+    const response = await ExperienceModel.findOne(experienceId).toObject();
     if (response == null) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
@@ -44,27 +45,37 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
 });
 
 experiencesRouter.get("/CSV", async (req, res, next) => {
-  const fields = [
-    "Role",
-    "Company",
-    "Description",
-    "Start Date",
-    "End Date",
-    "Area",
-    "Image",
-    "Username",
-  ];
-  const opts = { fields };
-  const experiences = ExperienceModel.find().toObject();
   try {
-    const parser = new Parser(opts);
-    const csv = parser.parse(experiences);
-    console.log(csv);
-  } catch (error) {
+ExperienceModel.plugin(mongoose_csv);
+} catch (error) {
     console.log(error);
     next(error);
   }
 });
+
+
+// experiencesRouter.get("/CSV", async (req, res, next) => {
+//     const fields = [
+//       "Role",
+//       "Company",
+//       "Description",
+//       "Start Date",
+//       "End Date",
+//       "Area",
+//       "Image",
+//       "Username",
+//     ];
+//     const opts = { fields };
+//     const experiences = ExperienceModel.find().toObject();
+//     try {
+//       const parser = new Parser(opts);
+//       const csv = parser.parse(experiences);
+//       console.log(csv);
+//     } catch (error) {
+//       console.log(error);
+//       next(error);
+//     }
+//   });
 
 experiencesRouter.post(
   "/:userId",
@@ -74,7 +85,7 @@ experiencesRouter.post(
       const newExperiences = new ExperienceModel(req.body);
       const { _id } = await newExperiences.save();
       const { userId } = req.params;
-      const response = await UserModel.findOne(userId);
+      const response = await UserModel.findOne(userId).toObject();
       if (response) {
         const user = await UserModel.findByIdAndUpdate(userId, {
           $push: { experiences: _id },
