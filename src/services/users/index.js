@@ -2,7 +2,9 @@ const express = require("express");
 const userRoutes = express.Router();
 const User = require("../../models/User");
 const sendEmail = require("../../lib/utils/email");
-const parser = require("../../lib/utils/cloudinary");
+const { userParser } = require("../../lib/utils/cloudinary");
+const expRoutes = require("../experiences/index");
+userRoutes.use("/experiences", expRoutes);
 
 //GET //api/users
 //GET ALL USERS
@@ -56,7 +58,7 @@ userRoutes.post("/", async (req, res, next) => {
 //REGISTER A USER
 userRoutes.post(
   "/:id/upload",
-  parser.single("image"),
+  userParser.single("image"),
   async (req, res, next) => {
     const { id } = req.params;
     try {

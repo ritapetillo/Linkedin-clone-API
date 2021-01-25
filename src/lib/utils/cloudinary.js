@@ -7,12 +7,20 @@ cloudinary.config({
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 //multer settings
-const storage = new CloudinaryStorage({
+const userStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "users",
   },
 });
-const parser = multer({ storage });
+const expStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "experiences",
+  },
+});
+const userParser = multer({ userStorage });
+const expParser = multer({ expStorage });
 
-module.exports = parser;
+
+module.exports = { userParser, expParser };

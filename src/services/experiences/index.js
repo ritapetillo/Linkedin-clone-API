@@ -4,20 +4,8 @@ const ApiError = require("../../classes/apiError");
 const experiencesRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
-// const UserModel = require("../../models/User");
-const multer = require("multer");
-const cloudinary = require("../cloudinary");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const mongoose_csv = require("mongoose-csv");
-const { Parser } = require("json2csv");
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "experiences",
-  },
-});
-const cloudinaryMulter = multer({ storage: storage });
+const { expParser } = require("../../lib/utils/cloudinary");
+const UserModel = require("../../models/User");
 
 experiencesRouter.get("/", async (req, res, next) => {
   try {
@@ -32,7 +20,7 @@ experiencesRouter.get("/", async (req, res, next) => {
 experiencesRouter.get("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
-    const response = await ExperienceModel.findOne(experienceId).toObject();
+    const response = await ExperienceModel.findOne(experienceId);
     if (response == null) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
@@ -46,13 +34,12 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
 
 experiencesRouter.get("/CSV", async (req, res, next) => {
   try {
-ExperienceModel.plugin(mongoose_csv);
-} catch (error) {
+    ExperienceModel.plugin(mongoose_csv);
+  } catch (error) {
     console.log(error);
     next(error);
   }
 });
-
 
 // experiencesRouter.get("/CSV", async (req, res, next) => {
 //     const fields = [
@@ -85,7 +72,7 @@ experiencesRouter.post(
       const newExperiences = new ExperienceModel(req.body);
       const { _id } = await newExperiences.save();
       const { userId } = req.params;
-      const response = await UserModel.findOne(userId).toObject();
+      const response = await UserModel.findById(userId);
       if (response) {
         const user = await UserModel.findByIdAndUpdate(userId, {
           $push: { experiences: _id },
@@ -105,7 +92,7 @@ experiencesRouter.post(
 
 experiencesRouter.post(
   "/:experienceId/picture",
-  cloudinaryMulter.single("image"),
+  expParser.single("image"),
   async (req, res, next) => {
     const { experienceId } = req.params;
     try {
@@ -152,6 +139,12 @@ experiencesRouter.delete("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
     const experience = await ExperienceModel.findByIdAndDelete(experienceId);
+    const { username } = experience;
+    const user = await UserModel.findOneAndUpdate(
+      { username },
+      { $pull: { experiences: experienceId } }
+    );
+
     if (experience) {
       res
         .status(201)
