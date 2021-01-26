@@ -4,7 +4,7 @@ const ApiError = require("../../classes/apiError");
 const experiencesRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
-const { expParser } = require("../../lib/utils/cloudinary");
+const expParser = require("../../lib/utils/cloudinary/experiences");
 const UserModel = require("../../models/User");
 
 experiencesRouter.get("/", async (req, res, next) => {

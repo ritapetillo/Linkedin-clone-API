@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const CommentsModel = require("../../models/Comment.js");
-const { commentParser } = require("../../lib/utils/cloudinary");
+const commentParser = require("../../lib/utils/cloudinary/comments");
 
 router.post("/", async (req, res, next) => {
   try {
@@ -75,26 +75,23 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/:id/upload", commentParser.single("img"),
-    async (req, res, next) => {
-      const { id } = req.params;
-      try {
-        console.log("id", id);
-        console.log("req.file", req.file)
-        const img = req.file && req.file.originalname;
-        console.log("img", img);
-        const updateComment = await CommentsModel.findByIdAndUpdate(
-          id,
-          { $push: { img } }
-        );
-        res
-          .status(201)
-          .json({ data: `Photo added to comment with ID ${id}` });
-      } catch (error) {
-        console.log(error);
-        next(error);
-      }
+router.post(
+  "/:id/upload",
+  commentParser.single("image"),
+  async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      console.log("req.file", req.file);
+      const img = req.file && req.file.path;
+      const updateComment = await CommentsModel.findByIdAndUpdate(id, {
+        $push: { img },
+      });
+      res.status(201).json({ data: `Photo added to comment with ID ${id}` });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 );
 
 module.exports = router;

@@ -2,7 +2,7 @@ const express = require("express");
 const userRoutes = express.Router();
 const User = require("../../models/User");
 const sendEmail = require("../../lib/utils/email");
-const { userParser } = require("../../lib/utils/cloudinary");
+const userParser  = require("../../lib/utils/cloudinary/users");
 const expRoutes = require("../experiences/index");
 userRoutes.use("/experiences", expRoutes);
 
