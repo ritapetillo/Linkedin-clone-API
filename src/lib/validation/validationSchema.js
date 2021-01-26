@@ -33,9 +33,9 @@ const schemas = {
     description: Joi.string().required(),
 }),
   PostSchema: Joi.object().keys({
-    text: Joi.string().min(1).required(),
-    user:Joi.string(),
-    image: Joi.string(),
+    text: Joi.string().required(),
+    img:Joi.string(),
+    user:Joi.string()
   }),
 };
 

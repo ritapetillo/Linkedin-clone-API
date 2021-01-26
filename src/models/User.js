@@ -3,7 +3,6 @@ const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
 const mongoose_csv = require("mongoose-csv");
 const AvatarGenerator = require("named-avatar-generator");
-
 const UserSchema = new Schema(
   {
     name: {
