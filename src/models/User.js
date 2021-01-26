@@ -38,9 +38,7 @@ const UserSchema = new Schema(
       type: String,
       required: true,
     },
-    image: {
-      type: String,
-    },
+    image: { type: String, default: "https://i.pravatar.cc/300" },
     experiences: [{ type: mongoose.Schema.Types.ObjectId, ref: "Experience" }],
     education: [{ type: mongoose.Schema.Types.ObjectId, ref: "Education" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],

@@ -31,11 +31,8 @@ const EducationSchema = new Schema(
       type: String,
       required: true,
     },
-    image: {
-      type: String,
-      required: false,
-    },
-   
+
+    image: { type: String, default: "https://image.shutterstock.com/image-photo/image-260nw-744810526.jpg" },
   },
   {
     timestamps: true,

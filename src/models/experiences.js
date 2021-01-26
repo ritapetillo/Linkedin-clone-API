@@ -32,14 +32,11 @@ const ExperienceSchema = new Schema(
       required: true,
       unique: true,
     },
-    image: {
-      type: String,
-      required: false,
-    },
+    image: { type: String, default: "https://res.cloudinary.com/youcancallmestevie/image/upload/v1611666010/experiences/default_ricn33.jpg" },
+
   },
   {
     timestamps: true,
-    required: false,
   }
 );
 ExperienceSchema.plugin(mongoose_csv);
