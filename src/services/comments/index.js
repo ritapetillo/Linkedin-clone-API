@@ -38,26 +38,39 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.put("/:id", async (req, res, next) => {
-  try {
-    const comment = await CommentsModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        runValidators: true,
-        new: true,
+router.put("/:id/user/:uid", async (req, res, next) => {
+  try{
+    const commentToUpdate = await CommentsModel.findById(req.params.id)
+  if(commentToUpdate.user[0] == req.params.uid)
+    {
+      try {
+      const comment = await CommentsModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      console.log("COMMENT:::::", comment.user[0]);
+      if (comment) {
+        res.send(comment);
+      } else {
+        const error = new Error(`comment with id ${req.params.id} not found`);
+        error.httpStatusCode = 404;
+        next(error);
       }
-    );
-    if (comment) {
-      res.send(comment);
-    } else {
-      const error = new Error(`comment with id ${req.params.id} not found`);
-      error.httpStatusCode = 404;
+    } catch (error) {
       next(error);
-    }
-  } catch (error) {
+    } 
+  } else {
+    const error = new Error('only the author of the comment can update his/her comment');
+    error.httpStatusCode = 403;
     next(error);
   }
+} catch (error){
+  console.log(error)
+}
 });
 
 router.delete("/:id", async (req, res, next) => {
