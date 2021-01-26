@@ -170,5 +170,60 @@ router.post("/:id/replies", async(req, res, next) => {
   }
 })
 
+// /comments/:cid/replies/:rid/user/:uid
+router.put("/:cid/replies/:rid/user/:uid", async(req, res, next) => {
+  try{
+    const { replies } = await CommentsModel.findById(req.params.cid, {
+      _id: 0,
+      replies: {
+        $elemMatch: {
+          _id: req.params.rid
+        }
+      }
+    });
+
+    console.log("reply user id:::::::::::", replies[0].user[0])
+
+    if(replies && replies.length > 0 && req.params.uid == replies[0].user[0]){
+      const replyToUpdate = {...replies[0].toObject(), ...req.body}
+      console.log("repy to update:::::::", replyToUpdate);
+      const modifiedReply = await CommentsModel.findOneAndUpdate(
+        {
+          _id: mongoose.Types.ObjectId(req.params.cid),
+          "replies._id": mongoose.Types.ObjectId(req.params.rid)
+        },
+        { $set: { "replies.$": replyToUpdate}}
+      )
+      console.log("modifiedReply:::::::", modifiedReply);
+      res.status(200).send(modifiedReply)
+    } else {
+      const error = new Error("Couldnt update reply with id=", req.params.rid);
+      next(error)
+    }
+  } catch(error){
+    const err = new Error("hereeeeeeeeeeeeeeeeeee");
+    next(err)
+  }
+})
+
+// /comments/:cid/replies/:rid/user/:uid
+router.delete("/:cid/replies/:rid/user/:uid", async(req, res, next) => {
+  try{
+    const modifiedReply = await CommentsModel.findByIdAndUpdate(
+      req.params.cid,
+      {
+        $pull: {
+          replies: {_id: req.params.rid}
+        }
+      }
+    );
+    res.status(200).send(modifiedReply)
+  } catch(error){
+    const err = new Error("Couldnt delete reply!");
+    next(err)
+  }
+});
+
+
 
 module.exports = router;
