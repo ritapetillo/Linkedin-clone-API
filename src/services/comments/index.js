@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const CommentsModel = require("../../models/Comment.js");
 const commentParser = require("../../lib/utils/cloudinary/comments");
+const q2m = require("query-to-mongo")
 
 router.post("/", async (req, res, next) => {
   try {
@@ -15,8 +16,13 @@ router.post("/", async (req, res, next) => {
 
 router.get("/", async (req, res, next) => {
   try {
-    const comment = await CommentsModel.find(req.query);
-    res.send(comment);
+    const query = q2m(req.query)
+    const total = await CommentsModel.countDocuments(query.criteria)
+    const comment = await CommentsModel.find(query.criteria, query.options.fields)
+          .sort(query.options.sort)
+          .skip(query.options.skip)
+          .limit(query.options.limit)
+    res.send({links: query.links("/comments", total), comment});
   } catch (error) {
     console.log(error);
     next(error);
@@ -163,10 +169,10 @@ router.post("/:id/replies", async (req, res, next) => {
           new: true,
         }
       );
+    res.status(201).send(updatedComment);
     } else {
       throw new Error();
     }
-    res.status(201).send(updatedComment);
   } catch (error) {
     const err = new Error("Something went wrong with POST.");
     err.httpStatusCode = 500;
