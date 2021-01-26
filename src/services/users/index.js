@@ -5,6 +5,7 @@ const sendEmail = require("../../lib/utils/email");
 const userParser = require("../../lib/utils/cloudinary/users");
 const expRoutes = require("../experiences/index");
 const edRoutes = require("../education/index")
+
 userRoutes.use("/experiences", expRoutes);
 userRoutes.use("/education", edRoutes);
 
@@ -83,8 +84,8 @@ userRoutes.post(
   }
 );
 
-//POST //api/users
-//REGISTER A USER
+//PUT //api/users
+//EDIT A USER
 userRoutes.put("/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
@@ -167,8 +168,23 @@ userRoutes.get("/:id", async (req, res, next) => {
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There are no users");
-    error.code = "400";
-    next(error);
   }
-});
+})
+    //POST / / api/users/login;
+    //REGISTER A USER
+    userRoutes.post("/login", async (req, res, next) => {
+      try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
+        const validPass = await user.comparePass(password);
+        console.log(validPass);
+        res.status(200).send({ validPass });
+      } catch (err) {
+        console.log(err);
+        const error = new Error("It was not possible to register a new user");
+        error.code = "400";
+        next(error);
+      }
+    });
+  
 module.exports = userRoutes;

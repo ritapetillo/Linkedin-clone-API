@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
 const mongoose_csv = require("mongoose-csv");
+const AvatarGenerator = require("named-avatar-generator");
 
 const UserSchema = new Schema(
   {
@@ -21,7 +22,7 @@ const UserSchema = new Schema(
     password: {
       type: String,
       required: true,
-      select: false,
+      // select: false,
     },
     email: {
       type: String,
@@ -61,8 +62,26 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
+
+
+UserSchema.methods.comparePass = async function (pass) {
+  try {
+    console.log(UserModel.password);
+    console.log(UserModel.password);
+
+    const isValid = await bcrypt.compare(pass, this.password);
+    console.log(isValid);
+    return isValid;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
 UserSchema.plugin(mongoose_csv);
+
 // UserSchema.pre("findByIdAndUpdate", function () {
 //   this.setOptions({ new: true });
 // });
-module.exports = mongoose.model("users", UserSchema);
+const UserModel = mongoose.model("users", UserSchema);
+module.exports = UserModel;

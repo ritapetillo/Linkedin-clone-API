@@ -31,6 +31,10 @@ const schemas = {
     endYear: Joi.number().required(),
     activtiesSocieties: Joi.string(),
     description: Joi.string().required(),
+}),
+  PostSchema: Joi.object().keys({
+    text: Joi.string().min(1).required(),
+    user:Joi.string(),
     image: Joi.string(),
   }),
   skillSchema: Joi.object().keys({

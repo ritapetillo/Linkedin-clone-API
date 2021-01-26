@@ -31,10 +31,11 @@
     "mongoose-csv": "^1.1.0",
     "multer": "^1.4.2",
     "multer-storage-cloudinary": "^4.0.0",
+    "named-avatar-generator": "0.0.1",
     "node-error-handler": "^1.1.14",
-    "query-to-mongo": "^0.10.1",
     "nodemailer": "^6.4.17",
-    "nodemailer-smtp-transport": "^2.7.4"
+    "nodemailer-smtp-transport": "^2.7.4",
+    "query-to-mongo": "^0.10.1"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
