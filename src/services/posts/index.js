@@ -46,7 +46,7 @@ Retrieves the specified post */
 postRouter.get("/:id", async(req,res,next)=>{
   const { id } = req.params
   try{
-    await Posts.findById(id).populate("user").exec(function (err, post) {
+    await Posts.findById(id).populate("user").populate("comments").exec(function (err, post) {
       if (err){
         console.log(err);
       } else {
@@ -103,22 +103,5 @@ postRouter.post(
     }
   }
 );
-/* postRouter.post(
-  "/:id",
-  postsParser.single("image"),
-  async (req, res, next) => {
-    const { id } = req.params;
-    try{
-      cloudinary.uploader.upload(req.body.img, function(result){
-        const updatePosts = Posts.findByIdAndUpdate(id,{
-          $set:{img: result.url},
-        })
-      })
-      res.status(201).json({ data: `Photo added to Post with ID ${id}`});
-    }catch(error){
-      console.log(error);
-      next(error);
-    }
-  }) */
 
 module.exports = postRouter
