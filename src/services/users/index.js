@@ -4,7 +4,9 @@ const User = require("../../models/User");
 const sendEmail = require("../../lib/utils/email");
 const { userParser } = require("../../lib/utils/cloudinary");
 const expRoutes = require("../experiences/index");
+const edRoutes = require("../education/index")
 userRoutes.use("/experiences", expRoutes);
+userRoutes.use("/education", edRoutes);
 
 //GET //api/users
 //GET ALL USERS
