@@ -84,7 +84,7 @@ router.post(
       console.log("req.file", req.file);
       const img = req.file && req.file.path;
       const updateComment = await CommentsModel.findByIdAndUpdate(id, {
-        $push: { img },
+        $set: { img },
       });
       res.status(201).json({ data: `Photo added to comment with ID ${id}` });
     } catch (error) {
