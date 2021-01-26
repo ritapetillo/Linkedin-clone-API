@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const auth = async (req, res, next) => {
   //I check if the header contains a token
   let token = req.header("auth-token");
-  token = token.split(" ")[1];
   //if there is no token, I deny the access
   if (!token) {
     const error = new Error("Access Denied");

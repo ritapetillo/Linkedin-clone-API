@@ -9,7 +9,7 @@ const edRoutes = require("../education/index");
 const jwt = require("jsonwebtoken");
 const { TOKEN_SECRET } = process.env;
 const { RETOKEN_SECRET } = process.env;
-const refreshTokens = [];
+const auth = require("../../lib/utils/privateRoutes");
 
 userRoutes.use("/experiences", expRoutes);
 userRoutes.use("/education", edRoutes);
@@ -21,6 +21,21 @@ userRoutes.get("/", async (req, res, next) => {
     const users = await User.find();
     //   .select("-_id");
     res.status(200).send({ users });
+  } catch (err) {
+    const error = new Error("There are no users");
+    error.code = "400";
+    next(error);
+  }
+});
+
+//GET //api/users/me
+//GET MY PROFILE
+userRoutes.get("/me", auth, async (req, res, next) => {
+  try {
+    const user = req.user;
+    const currentUser = await User.findById(user.id);
+    //   .select("-_id");
+    res.status(200).send({ currentUser });
   } catch (err) {
     const error = new Error("There are no users");
     error.code = "400";
