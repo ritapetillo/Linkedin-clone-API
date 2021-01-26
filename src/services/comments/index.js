@@ -169,10 +169,10 @@ router.post("/:id/replies", async (req, res, next) => {
           new: true,
         }
       );
+    res.status(201).send(updatedComment);
     } else {
       throw new Error();
     }
-    res.status(201).send(updatedComment);
   } catch (error) {
     const err = new Error("Something went wrong with POST.");
     err.httpStatusCode = 500;
