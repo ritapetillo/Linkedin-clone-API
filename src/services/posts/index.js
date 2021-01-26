@@ -1,6 +1,8 @@
 const express = require("express");
 const postRouter = express.Router()
 const Posts = require("../../models/Post");
+const validationMiddleware = require("../../lib/validation/validationMiddleware");
+const schemas = require("../../lib/validation/validationSchema");
 
 
 
@@ -20,7 +22,7 @@ postRouter.get("/", async(req,res,next)=>{
 
 /* - POST https://yourapi.herokuapp.com/api/posts/
 Creates a new post */
-postRouter.post("/", async(req,res,next)=>{
+postRouter.post("/",validationMiddleware(schemas.PostSchema), async(req,res,next)=>{
     try{
       const newPost = new Posts(req.body)
       const savedPost = await newPost.save()
@@ -45,7 +47,7 @@ postRouter.get("/:id", async(req,res,next)=>{
 })
 /* - PUT https://yourapi.herokuapp.com/api/posts/{postId}
 Edit a given post */
-postRouter.put("/:id", async(req,res,next)=>{
+postRouter.put("/:id",validationMiddleware(schemas.PostSchema), async(req,res,next)=>{
   const { id } = req.params
   try{
     const updatedPost = await Posts.findByIdAndUpdate(id,req.body)

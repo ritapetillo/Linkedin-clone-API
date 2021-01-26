@@ -12,7 +12,7 @@ const schemas = {
     password: Joi.string().min(6).required(),
   }),
   PostSchema: Joi.object().keys({
-    text: Joi.string().required(),
+    text: Joi.string().min(1).required(),
     image: Joi.string(),
   }),
 };
