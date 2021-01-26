@@ -174,7 +174,8 @@ router.post("/:id/replies", async (req, res, next) => {
   }
 });
 
-// /comments/:cid/replies/:rid/user/:uid
+//   /comments/:cid/replies/:rid/user/:uid
+// DOESNT WORK 
 router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
   try {
     const { replies } = await CommentsModel.findById(req.params.cid, {
@@ -190,15 +191,20 @@ router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
 
     if (replies && replies.length > 0 && req.params.uid == replies[0].user[0]) {
       const replyToUpdate = { ...replies[0].toObject(), ...req.body };
-      console.log("repy to update:::::::", replyToUpdate);
-      const modifiedReply = await CommentsModel.findOneAndUpdate(
-        {
-          _id: mongoose.Types.ObjectId(req.params.cid),
-          "replies._id": mongoose.Types.ObjectId(req.params.rid),
-        },
-        { $set: { "replies.$": replyToUpdate } }
-      );
-      console.log("modifiedReply:::::::", modifiedReply);
+      console.log("reply to update:::::::", replyToUpdate);
+      try {
+        const modifiedReply = await CommentsModel.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(req.params.cid),
+            "replies._id": mongoose.Types.ObjectId(req.params.rid),
+          },
+          { $set: { "replies.$": replyToUpdate } }
+        );
+        console.log("modifiedReply:::::::", modifiedReply);
+      } catch (e) {
+        const err = new Error("nooooooooooooooooo");
+        next(err);
+      }
       res.status(200).send(modifiedReply);
     } else {
       const error = new Error("Couldnt update reply with id=", req.params.rid);
