@@ -235,7 +235,7 @@ userRoutes.post("/login", async (req, res, next) => {
         httpOnly: true,
       });
 
-      res.send({ accessToken, refreshToken });
+      res.send({ accessToken, refreshToken, expiresIn: Date.now() + 3600000 });
     } else next(new Error("Username or password is wrong"));
     res.status(200).send({ validPass });
   } catch (err) {
