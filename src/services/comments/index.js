@@ -73,18 +73,33 @@ router.put("/:id/user/:uid", async (req, res, next) => {
 }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id/user/:uid", async (req, res, next) => {
   try {
-    const comment = await CommentsModel.findByIdAndDelete(req.params.id);
-    if (comment) {
-      res.send(req.params.id);
+    const commmentToDelete = await CommentsModel.findById(req.params.id);
+    if(commmentToDelete.user[0] == req.params.uid){
+      try{
+        const comment = await CommentsModel.findByIdAndDelete(req.params.id);
+        if (comment) {
+          res.send(req.params.id);
+        } else {
+          const error = new Error(`comment with id ${req.params.id} not found`);
+          error.httpStatusCode = 404;
+          next(error);
+        }
+      } catch (error){
+        const er = new Error(`Something went wrong`);
+          er.httpStatusCode = 400;
+          next(er);
+      }
     } else {
-      const error = new Error(`comment with id ${req.params.id} not found`);
-      error.httpStatusCode = 404;
-      next(error);
+      const er = new Error(`only the author of the comment or the author can delete the comment`);
+      er.httpStatusCode = 403;
+      next(er);
     }
   } catch (error) {
-    next(error);
+    const e = new Error(`only the author of the comment or the author can delete the comment`);
+    e.httpStatusCode = 403;
+    next(e);
   }
 });
 
