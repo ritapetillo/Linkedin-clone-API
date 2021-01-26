@@ -224,7 +224,17 @@ userRoutes.post("/login", async (req, res, next) => {
       const saveReToken = new RefreshToken({ token: refreshToken });
       await saveReToken.save();
 
-      res.header("auth-token", accessToken);
+      // res.header("auth-token", accessToken);
+      res.cookie("token", accessToken, {
+        // expires: new Date(Date.now() + expiration),
+        secure: false, // set to true if your using https
+        httpOnly: true,
+      });
+      res.cookie("refreshToken", refreshToken, {
+        secure: false, // set to true if your using https
+        httpOnly: true,
+      });
+
       res.send({ accessToken, refreshToken });
     } else next(new Error("Username or password is wrong"));
     res.status(200).send({ validPass });
@@ -240,12 +250,17 @@ userRoutes.post("/login", async (req, res, next) => {
 //LOGIN
 userRoutes.post("/renewToken", async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies;
     const token = RefreshToken.findOne({ token: refreshToken });
     if (!refreshToken || !token) return next(new Error("Unauthorized"));
     const user = await jwt.verify(refreshToken, RETOKEN_SECRET);
     const accessToken = await jwt.sign(user, TOKEN_SECRET);
-    res.status(200).send({ accessToken });
+    res.cookie("token", accessToken, {
+      // expires: new Date(Date.now() + expiration),
+      secure: false, // set to true if your using https
+      httpOnly: true,
+    });
+    res.status(200).json(" credential renewed");
   } catch (err) {
     console.log(err);
     const error = new Error("Unauthorized ");
@@ -258,8 +273,11 @@ userRoutes.post("/renewToken", async (req, res, next) => {
 //LOGIN
 userRoutes.delete("/auth/logout", async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies.refreshToken;
     const token = RefreshToken.findOneAndDelete({ token: refreshToken });
+    res.clearCookie("refreshToekn");
+    res.clearCookie("token");
+
     res.status(200).send("logged out");
   } catch (err) {
     console.log(err);
