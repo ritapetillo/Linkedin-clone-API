@@ -4,7 +4,7 @@ const ApiError = require("../../classes/apiError");
 const educationRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
-const { expParser } = require("../../lib/utils/cloudinary");
+const edParser = require("../../lib/utils/cloudinary/education.js");
 const UserModel = require("../../models/User");
 
 educationRouter.get("/", async (req, res, next) => {
@@ -72,9 +72,11 @@ educationRouter.post(
   }
 );
 
+
 educationRouter.post(
   "/:educationId/picture",
-  expParser.single("image"),
+  edParser.single("image"),
+
   async (req, res, next) => {
     const { educationId } = req.params;
     try {
