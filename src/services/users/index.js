@@ -106,7 +106,7 @@ userRoutes.post("/login", async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
-    const validPass = user.comparePass(password);
+    const validPass = await user.comparePass(password);
     console.log(validPass);
     res.status(200).send({ validPass });
   } catch (err) {
