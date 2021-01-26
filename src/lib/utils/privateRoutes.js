@@ -3,8 +3,6 @@ const jwt = require("jsonwebtoken");
 const auth = async (req, res, next) => {
   //I check if the header contains a token
   let token = req.cookies.token;
-  let retoken = req.cookies.refreshToken;
-  console.log(retoken);
 
   //if there is no token, I deny the access
   if (!token) {
