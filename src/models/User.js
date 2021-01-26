@@ -43,7 +43,8 @@ const UserSchema = new Schema(
     },
     experiences: [{ type: mongoose.Schema.Types.ObjectId, ref: "Experience" }],
     education: [{ type: mongoose.Schema.Types.ObjectId, ref: "Education" }],
-
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
   },
   { timestamps: true }
 );
