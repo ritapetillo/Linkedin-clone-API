@@ -224,6 +224,24 @@ router.delete("/:cid/replies/:rid/user/:uid", async(req, res, next) => {
   }
 });
 
-
+// /comments/:cid/replies/:rid/upload
+// router.post(
+//   "/:cid/replies/:rid/upload",
+//   commentParser.single("image"),
+//   async (req, res, next) => {
+//     const { id } = req.params;
+//     try {
+//       console.log("req.file", req.file);
+//       const img = req.file && req.file.path;
+//       const updateComment = await CommentsModel.findByIdAndUpdate(id, {
+//         $set: { img },
+//       });
+//       res.status(201).json({ data: `Photo added to comment with ID ${id}` });
+//     } catch (error) {
+//       console.log(error);
+//       next(error);
+//     }
+//   }
+// );
 
 module.exports = router;
