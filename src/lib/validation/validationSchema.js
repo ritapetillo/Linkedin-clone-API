@@ -13,7 +13,8 @@ const schemas = {
   
   }),
   commentSchema: Joi.object().keys({
-    text: Joi.string()
+    text: Joi.string().required(),
+    user: Joi.string().required()
   }),
   experienceSchema: Joi.object().keys({
     role: Joi.string().required(),
