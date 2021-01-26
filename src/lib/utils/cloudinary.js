@@ -19,8 +19,15 @@ const expStorage = new CloudinaryStorage({
     folder: "experiences",
   },
 });
+const commentStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "comments",
+  },
+});
+
 const userParser = multer({ userStorage });
 const expParser = multer({ expStorage });
+const commentParser = multer({ commentStorage})
 
-
-module.exports = { userParser, expParser };
+module.exports = { userParser, expParser, commentParser };
