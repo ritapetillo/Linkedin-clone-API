@@ -41,6 +41,7 @@ const UserSchema = new Schema(
     image: {
       type: String,
     },
+    skills: [{ type: mongoose.Schema.Types.ObjectId, ref: "Skills" }],
     experiences: [{ type: mongoose.Schema.Types.ObjectId, ref: "Experience" }],
     education: [{ type: mongoose.Schema.Types.ObjectId, ref: "Education" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
