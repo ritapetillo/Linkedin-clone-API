@@ -58,6 +58,17 @@ UserSchema.pre("save", async function (next) {
 });
 
 UserSchema.plugin(mongoose_csv);
+
+UserSchema.methods.comparePass = async function (pass, cb, next) {
+  try {
+    const isValid = bcrypt.compare(pass, this.password);
+    if (!isValid) return next(new Error("password don't match"));
+    return isValid;
+  } catch (err) {
+    const error = new Error("Password not valid");
+    next(error);
+  }
+};
 // UserSchema.pre("findByIdAndUpdate", function () {
 //   this.setOptions({ new: true });
 // });

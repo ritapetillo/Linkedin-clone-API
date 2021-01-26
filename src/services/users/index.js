@@ -4,6 +4,7 @@ const User = require("../../models/User");
 const sendEmail = require("../../lib/utils/email");
 const { userParser } = require("../../lib/utils/cloudinary");
 const expRoutes = require("../experiences/index");
+
 userRoutes.use("/experiences", expRoutes);
 
 //GET //api/users
@@ -80,10 +81,9 @@ userRoutes.post(
     }
   }
 );
-module.exports = userRoutes;
 
-//POST //api/users
-//REGISTER A USER
+//PUT //api/users
+//EDIT A USER
 userRoutes.put("/:id", async (req, res, next) => {
   const { id } = req.params;
   try {
@@ -92,6 +92,23 @@ userRoutes.put("/:id", async (req, res, next) => {
       new: true,
     });
     res.status(200).send({ editedUser });
+  } catch (err) {
+    console.log(err);
+    const error = new Error("It was not possible to register a new user");
+    error.code = "400";
+    next(error);
+  }
+});
+
+//POST / / api/users/login;
+//REGISTER A USER
+userRoutes.post("/login", async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    const validPass = user.comparePass(password);
+    console.log(validPass);
+    res.status(200).send({ validPass });
   } catch (err) {
     console.log(err);
     const error = new Error("It was not possible to register a new user");
