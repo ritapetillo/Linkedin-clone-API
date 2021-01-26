@@ -11,6 +11,10 @@ const schemas = {
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
   }),
+  PostSchema: Joi.object().keys({
+    text: Joi.string().required(),
+    image: Joi.string(),
+  }),
 };
 
    

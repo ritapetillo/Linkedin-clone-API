@@ -1,7 +1,6 @@
 const express = require("express");
-const Post = require("../../models/Post");
 const postRouter = express.Router()
-const Posts = require("../../models/Post")
+const Posts = require("../../models/Post");
 
 
 
@@ -23,12 +22,12 @@ postRouter.get("/", async(req,res,next)=>{
 Creates a new post */
 postRouter.post("/", async(req,res,next)=>{
     try{
-      const newpost = new Posts(req.body)
-      const savedPost = await newpost.save()
+      const newPost = new Posts(req.body)
+      const savedPost = await newPost.save()
       res.status(200).send({savedPost})
     }
     catch(err){
-        res.status(400).send({err})
+        res.status(400).send(err)
     }
 })
 
@@ -60,7 +59,7 @@ Removes a post */
 postRouter.delete("/:id", async(req,res,next)=>{
   const { id } = req.params
   try{
-    const removedPost = await Post.findByIdAndDelete(id)
+    const removedPost = await Posts.findByIdAndDelete(id)
     res.status(200).send("Deleted Post with Id: " + id)
   }catch(err){
 
