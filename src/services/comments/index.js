@@ -122,4 +122,53 @@ router.post(
   }
 );
 
+// /comments/:id/replies GET
+router.get("/:id/replies", async(req, res, next) => {
+  try{
+    const { replies } = await CommentsModel.findById(req.params.id);
+    res.status(200).send(replies);
+  } catch(error){
+    const err = new Error("Something went wrong with GET.");
+    err.httpStatusCode = 400;
+    next(err)
+  }
+})
+
+// /comments/:id/replies POST
+router.post("/:id/replies", async(req, res, next) => {
+  try{
+    const replyText = req.body.text;
+    const replyAuthorId = req.body.user;
+    
+    const replyToInsert = {
+      text: replyText,
+      user: replyAuthorId
+    }
+    console.log("REPLY TO INSERT:::::::", replyToInsert);
+    if(replyAuthorId){
+    const updatedComment = await CommentsModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          replies: replyToInsert,
+        }
+      },
+      {
+        runValidators: true,
+        new: true
+      }
+    );
+    } else {
+      throw new Error();
+    }
+    res.status(201).send(updatedComment);
+
+  } catch(error){
+    const err = new Error("Something went wrong with POST.");
+    err.httpStatusCode = 500;
+    next(err)
+  }
+})
+
+
 module.exports = router;
