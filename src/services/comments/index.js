@@ -75,24 +75,26 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/:id/upload", commentParser.single("image"),
-  async (req, res, next) => {
-    const { id } = req.params;
-    try {
-      const image = req.file && req.file.path;
-      console.log("IMAGE::::::::", image)
-      const editedComment = await CommentsModel.findByIdAndUpdate(
-        id,
-         { $set: { img: image }}
-      );
-      res.status(200).send({editedComment});
-    } catch (err) {
-      console.log(err)
-      const error = new Error("Couldn't add image :/");
-      error.code = "400";
-      next(error);
+router.post("/:id/upload", commentParser.single("img"),
+    async (req, res, next) => {
+      const { id } = req.params;
+      try {
+        console.log("id", id);
+        console.log("req.file", req.file)
+        const img = req.file && req.file.originalname;
+        console.log("img", img);
+        const updateComment = await CommentsModel.findByIdAndUpdate(
+          id,
+          { $push: { img } }
+        );
+        res
+          .status(201)
+          .json({ data: `Photo added to comment with ID ${id}` });
+      } catch (error) {
+        console.log(error);
+        next(error);
+      }
     }
-  }
 );
 
 module.exports = router;

@@ -20,7 +20,7 @@ const expStorage = new CloudinaryStorage({
   },
 });
 const commentStorage = new CloudinaryStorage({
-  cloudinary,
+  cloudinary: cloudinary,
   params: {
     folder: "comments",
   },
