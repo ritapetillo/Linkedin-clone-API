@@ -2,7 +2,7 @@ const express = require("express");
 const userRoutes = express.Router();
 const User = require("../../models/User");
 const sendEmail = require("../../lib/utils/email");
-const userParser  = require("../../lib/utils/cloudinary/users");
+const userParser = require("../../lib/utils/cloudinary/users");
 const expRoutes = require("../experiences/index");
 const edRoutes = require("../education/index")
 userRoutes.use("/experiences", expRoutes);
@@ -82,7 +82,6 @@ userRoutes.post(
     }
   }
 );
-module.exports = userRoutes;
 
 //POST //api/users
 //REGISTER A USER
@@ -97,6 +96,77 @@ userRoutes.put("/:id", async (req, res, next) => {
   } catch (err) {
     console.log(err);
     const error = new Error("It was not possible to register a new user");
+    error.code = "400";
+    next(error);
+  }
+});
+
+//GET //api/users
+//GET ALL USERS
+userRoutes.post("/follow/:followId", async (req, res, next) => {
+  try {
+    const { followId } = req.params;
+    const { userId } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: { following: followId },
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+    const follow = await User.findByIdAndUpdate(followId, {
+      $addToSet: { followers: userId },
+    });
+    res.status(201).send({ user });
+  } catch (err) {
+    const error = new Error("There are no users");
+    error.code = "400";
+    next(error);
+  }
+});
+
+
+
+//PUT //api/users/:userId/unfollow/:followId
+//UNFOLLOW AN USER
+userRoutes.put("/unfollow/:followId", async (req, res, next) => {
+  try {
+    const { followId } = req.params;
+    const {userId} = req.body;
+
+    const following = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { following: followId },
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+    const follower = await User.findByIdAndUpdate(followId, {
+      $pull: { followers: userId },
+    });
+    res.status(201).send({ following });
+  } catch (err) {
+    const error = new Error("There was a problem unfollowing this user");
+    error.code = "400";
+    next(error);
+  }
+});
+
+//GET //api/users
+//GET ALL USERS
+userRoutes.get("/:id", async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    res.status(200).send({ user });
+  } catch (err) {
+    const error = new Error("There are no users");
     error.code = "400";
     next(error);
   }
