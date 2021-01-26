@@ -37,6 +37,9 @@ const schemas = {
     user:Joi.string(),
     image: Joi.string(),
   }),
+  skillSchema: Joi.object().keys({
+    text: Joi.string().required(),
+  }),
 };
 
 module.exports = schemas;
