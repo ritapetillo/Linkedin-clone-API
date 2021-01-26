@@ -6,10 +6,10 @@ const CommentModel = new Schema({
         type: String,
         required: true,
     },
-    img: [{
+    img: {
         type: String,
         required: false
-    }]
+    }
 });
 
 //schema exported as a model
