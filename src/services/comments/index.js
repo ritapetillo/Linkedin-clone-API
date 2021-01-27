@@ -6,6 +6,8 @@ const q2m = require("query-to-mongo")
 const mongoose = require("mongoose")
 const auth = require("../../lib/utils/privateRoutes");
 
+// /comments/:
+// post new comment
 router.post("/", async (req, res, next) => {
   try {
     const newComment = new CommentsModel(req.body);
@@ -16,6 +18,8 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+// /comments/
+// retrieve all comments
 router.get("/", async (req, res, next) => {
   try {
     const query = q2m(req.query)
@@ -31,6 +35,8 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// /comments/:id
+// retrieve that specific comment
 router.get("/:id", async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -46,6 +52,8 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+// /comments/:id
+// update that specific comment
 router.put("/:id/", auth, async (req, res, next) => {
   try {
     const user = req.user.id;
@@ -83,6 +91,8 @@ router.put("/:id/", auth, async (req, res, next) => {
   }
 });
 
+// /comments/:id
+// delete that specific comment
 router.delete("/:id/", auth, async (req, res, next) => {
   try {
     const user = req.user.id;
@@ -118,6 +128,8 @@ router.delete("/:id/", auth, async (req, res, next) => {
   }
 });
 
+// /comments/:id/upload
+// comment with image
 router.post(
   "/:id/upload",
   commentParser.single("image"),
@@ -138,6 +150,7 @@ router.post(
 );
 
 // /comments/:id/replies GET
+// retrieve all replies
 router.get("/:id/replies", async (req, res, next) => {
   try {
     const { replies } = await CommentsModel.findById(req.params.id);
@@ -150,6 +163,7 @@ router.get("/:id/replies", async (req, res, next) => {
 });
 
 // /comments/:id/replies POST
+// post reply
 router.post("/:id/replies", auth, async (req, res, next) => {
   try {
     const replyAuthorId = req.user.id
@@ -185,6 +199,7 @@ router.post("/:id/replies", auth, async (req, res, next) => {
 });
 
 //   /comments/:cid/replies/:rid
+// update reply
 router.put("/:cid/replies/:rid", auth, async (req, res, next) => {
   try {
     const user = req.user.id;
@@ -228,6 +243,7 @@ router.put("/:cid/replies/:rid", auth, async (req, res, next) => {
 });
 
 // /comments/:cid/replies/:rid
+// delete reply
 router.delete("/:cid/replies/:rid", auth, async (req, res, next) => {
   try {
     const user = req.user.id;
@@ -272,26 +288,8 @@ router.delete("/:cid/replies/:rid", auth, async (req, res, next) => {
   }
 });
 
-// router.post(
-//   "/:cid/replies/:rid/upload",
-//   commentParser.single("image"),
-//   async (req, res, next) => {
-//     const { id } = req.params;
-//     try {
-//       console.log("req.file", req.file);
-//       const img = req.file && req.file.path;
-//       const updateComment = await CommentsModel.findByIdAndUpdate(id, {
-//         $set: { img },
-//       });
-//       res.status(201).json({ data: `Photo added to comment with ID ${id}` });
-//     } catch (error) {
-//       console.log(error);
-//       next(error);
-//     }
-//   }
-// );
-
 // /comments/:cid/replies/:rid/upload
+// upload img as a reply
 router.post("/:cid/replies/:rid/upload", commentParser.single("image"), async (req, res, next) => {
   try {
     const { replies } = await CommentsModel.findById(req.params.cid, {
