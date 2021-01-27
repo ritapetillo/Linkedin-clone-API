@@ -22,7 +22,7 @@ educationRouter.get("/:educationId", async (req, res, next) => {
   const { educationId } = req.params;
   try {
     const response = await EducationModel.findById(educationId);
-    if (response == null) {
+    if (!response) {
       throw new ApiError(404, `No education with ID ${educationId} found`);
     } else {
       res.status(200).json({ data: response });
@@ -53,10 +53,7 @@ educationRouter.post(
   async (req, res, next) => {
     const user = req.user;
     try {
-      const currentUser = await UserModel.findById(user.id);
-      if (!currentUser)
-        throw new ApiError(403, `Only the owner of this profile can edit`);
-      const newEducation = new EducationModel(req.body);
+  const newEducation = new EducationModel(req.body);
       newEducation.userId = user.id
       const { _id } = await newEducation.save();
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
@@ -104,18 +101,43 @@ educationRouter.put(
   async (req, res, next) => {
     const { educationId } = req.params;
     const user = req.user;
+    const educationToEdit = await EducationModel.findById(educationId);
     try {
-      const currentUser = await UserModel.findById(user.id);
-      if (!currentUser)
+      if (educationToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const education = await EducationModel.findByIdAndUpdate(
+      const updatedEducation = await EducationModel.findByIdAndUpdate(
         educationId,
-        req.body
-      );
-      if (education && currentUser) {
+        req.body, {
+          runValidators: true,
+          new: true,
+        });
+        res
+        .status(201)
+        .json({ data: `Education with ID ${educationId} edited` });
+      } catch (error) {
+        console.log(error);
+        next(error);
+      }
+    }
+  );
+
+educationRouter.delete("/:educationId", auth, async (req, res, next) => {
+  const { educationId } = req.params;
+  const user = req.user;
+  const educationToDelete = await EducationModel.findById(id);
+ try {
+    if (educationToDelete.userId !== user.id)
+    throw new ApiError(403, `Only the owner of this profile can edit`);
+   const education = await EducationModel.findByIdAndDelete(educationId);
+      const { userId } = education;
+      if (education) {
+        const userModified = await UserModel.findByIdAndUpdate(
+          { userId },
+          { $pull: { education: educationId } }
+        );
         res
           .status(201)
-          .json({ data: `Education with ID ${educationId} updated` });
+          .json({ data: `Education with ID ${educationId} deleted` });
       } else {
         throw new ApiError(404, `No education with ID ${educationId} found`);
       }
@@ -123,33 +145,6 @@ educationRouter.put(
       console.log(error);
       next(error);
     }
-  }
-);
-
-educationRouter.delete("/:educationId", auth, async (req, res, next) => {
-  const { educationId } = req.params;
-  const user = req.user;
-  try {
-    const currentUser = await UserModel.findById(user.id);
-    if (!currentUser)
-      throw new ApiError(403, `Only the owner of this profile can edit`);
-    const education = await EducationModel.findByIdAndDelete(educationId);
-    const { userId } = education;
-    if (education) {
-      const userModified = await UserModel.findByIdAndUpdate(
-        userId,
-        { $pull: { education: educationId } }
-      );
-      res
-        .status(201)
-        .json({ data: `Education with ID ${educationId} deleted` });
-    } else {
-      throw new ApiError(404, `No education with ID ${educationId} found`);
-    }
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
+  });
 
 module.exports = educationRouter;

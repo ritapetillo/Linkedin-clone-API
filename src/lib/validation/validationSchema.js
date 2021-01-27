@@ -39,11 +39,10 @@ const schemas = {
     userId: Joi.string(),
   }),
   PostSchema: Joi.object().keys({
-
-    text: Joi.string().required(),
+text: Joi.string().required(),
     img:Joi.string(),
-    user:Joi.string().required(),
     comments:Joi.string(),
+    userId: Joi.string(),
 
   }),
   skillSchema: Joi.object().keys({
