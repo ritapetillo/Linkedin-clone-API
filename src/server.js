@@ -6,10 +6,17 @@ const PORT = process.env.PORT || 3001;
 const apiRoutes = require("./services/index");
 const mongoose = require("mongoose");
 const listEndpoints = require("express-list-endpoints");
+const cookieParser = require("cookie-parser");
 
 //MIDDLEWARES
 server.use(express.json());
-server.use(cors());
+server.use(
+  cors({
+    origin: [`${process.env.FRONT_URL}`, "http://localhost:3000"],
+    credentials: true,
+  })
+);
+server.use(cookieParser());
 
 //ROUTE
 server.use("/api", apiRoutes);
