@@ -3,6 +3,9 @@ const postRouter = express.Router()
 const Posts = require("../../models/Post");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const schemas = require("../../lib/validation/validationSchema");
+const postsParser = require("../../lib/utils/cloudinary/posts");
+const q2m = require("query-to-mongo")
+
 
 
 
@@ -10,10 +13,17 @@ const schemas = require("../../lib/validation/validationSchema");
 Retrieve posts */
 postRouter.get("/", async(req,res,next)=>{
     try {
-        const posts = await Posts.find();
-        res.status(200).send({ posts });
+      const query = q2m(req.query)
+      const allPosts = await Posts.countDocuments(query.criteria)
+      const Post = await Posts.find(query.criteria, query.options.fields)
+      .sort(query.options.sort)
+      .skip(query.options.skip)
+      .limit(query.options.limit)
+      .populate("user")
+      .populate("comments")
+      res.send({links: query.links("/api/posts", allPosts), Post});
       } catch (err) {
-        const error = new Error("There are no posts");
+        const error = new Error("There are no Posts");
         error.code = "400";
         next(error);
       }
@@ -38,8 +48,17 @@ Retrieves the specified post */
 postRouter.get("/:id", async(req,res,next)=>{
   const { id } = req.params
   try{
-    const post = await Posts.findById(id)
-    res.status(200).send({post})
+    await Posts.findById(id)
+    .populate("user")
+    .populate("comments")
+    .exec(function (err, post) {
+      if (err){
+        console.log(err);
+      } else {
+        res.status(200).json(post);
+        console.log("success");
+      }
+    });
   }catch(err){
     res.status(400).send({err})
   }
@@ -69,8 +88,24 @@ postRouter.delete("/:id", async(req,res,next)=>{
 })
 /* - POST https://yourapi.herokuapp.com/api/posts/{postId}
 Add an image to the post under the name of "post" */
-postRouter.post("/:id", async(req,res,next)=>{
-    
-})
+postRouter.post(
+  "/:id",
+  postsParser.single("img"),
+  async (req, res, next) => {
+    const { id } = req.params;
+    console.log(id)
+  try {
+      console.log("req.file", req.file);
+      const img = req.file && req.file.path;
+      const updatePosts = await Posts.findByIdAndUpdate(id, {
+        $push: { img },
+      });
+      res.status(201).json({ data: `Photo added to Post with ID ${id}` });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
 module.exports = postRouter

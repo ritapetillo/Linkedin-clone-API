@@ -11,7 +11,12 @@ const PostSchema = new Schema(
       image: {
         type: String,
       },
-      comments:
+
+      user:{type: Schema.Types.ObjectId, ref: "users", required: true},
+      img: {
+        type: String
+    },
+  comments:
         [{type: Schema.Types.ObjectId,ref:"Comment"}]
     },
     { timestamps: true }

@@ -3,6 +3,7 @@ const router = express.Router();
 const CommentsModel = require("../../models/Comment.js");
 const commentParser = require("../../lib/utils/cloudinary/comments");
 const q2m = require("query-to-mongo")
+const mongoose = require("mongoose")
 
 router.post("/", async (req, res, next) => {
   try {
@@ -19,10 +20,10 @@ router.get("/", async (req, res, next) => {
     const query = q2m(req.query)
     const total = await CommentsModel.countDocuments(query.criteria)
     const comment = await CommentsModel.find(query.criteria, query.options.fields)
-          .sort(query.options.sort)
-          .skip(query.options.skip)
-          .limit(query.options.limit)
-    res.send({links: query.links("/comments", total), comment});
+      .sort(query.options.sort)
+      .skip(query.options.skip)
+      .limit(query.options.limit)
+    res.send({ links: query.links("/comments", total), comment });
   } catch (error) {
     console.log(error);
     next(error);
@@ -169,7 +170,7 @@ router.post("/:id/replies", async (req, res, next) => {
           new: true,
         }
       );
-    res.status(201).send(updatedComment);
+      res.status(201).send(updatedComment);
     } else {
       throw new Error();
     }
@@ -204,21 +205,22 @@ router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
             _id: mongoose.Types.ObjectId(req.params.cid),
             "replies._id": mongoose.Types.ObjectId(req.params.rid),
           },
-          { $set: { "replies.$": replyToUpdate } }
+          { $set: { "replies.$": replyToUpdate } },
+          {
+            runValidators: true,
+            new: true
+          }
         );
-        console.log("modifiedReply:::::::", modifiedReply);
       } catch (e) {
-        const err = new Error("nooooooooooooooooo");
-        next(err);
+        console.log(e)
       }
-      res.status(200).send(modifiedReply);
+      res.status(200).send("reply modied successfully!");
     } else {
       const error = new Error("Couldnt update reply with id=", req.params.rid);
       next(error);
     }
   } catch (error) {
-    const err = new Error("hereeeeeeeeeeeeeeeeeee");
-    next(err);
+    console.log(error)
   }
 });
 

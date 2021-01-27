@@ -1,7 +1,6 @@
 const express = require("express");
 const userRoutes = express.Router();
 const User = require("../../models/User");
-const RefreshToken = require("../../models/RefreshToken");
 const sendEmail = require("../../lib/utils/email");
 const userParser = require("../../lib/utils/cloudinary/users");
 const expRoutes = require("../experiences/index");
@@ -10,18 +9,21 @@ const skillRoutes = require("../skills/index");
 const jwt = require("jsonwebtoken");
 const { TOKEN_SECRET } = process.env;
 const { RETOKEN_SECRET } = process.env;
+
 const auth = require("../../lib/utils/privateRoutes");
+const validation = require("../../lib/validation/validationMiddleware");
+const valSchema = require("../../lib/validation/validationSchema");
+
 
 userRoutes.use("/experiences", expRoutes);
 userRoutes.use("/education", edRoutes);
 userRoutes.use("/skills", skillRoutes);
 
-//GET //api/users
+//GET /api/users
 //GET ALL USERS
 userRoutes.get("/", async (req, res, next) => {
   try {
     const users = await User.find();
-    //   .select("-_id");
     res.status(200).send({ users });
   } catch (err) {
     const error = new Error("There are no users");
@@ -30,30 +32,29 @@ userRoutes.get("/", async (req, res, next) => {
   }
 });
 
-//GET //api/users/me
+//GET /api/users/me
 //GET MY PROFILE
 userRoutes.get("/me", auth, async (req, res, next) => {
   try {
     const user = req.user;
-    const currentUser = await User.findById(user.id);
-    //   .select("-_id");
+    const currentUser = await User.findById(user.id).select("-password");
     res.status(200).send({ currentUser });
   } catch (err) {
-    const error = new Error("There are no users");
+    const error = new Error("You are not authorized to see this user");
     error.code = "400";
     next(error);
   }
 });
-//GET //api/users
-//GET ALL USERS
+
+//GET //api/users/csv
+//GET ALL USERS in a cvs file
 userRoutes.get("/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",
       "Content-Disposition": "attachment; filename=users.csv",
     });
-    const users = await User.find().csv(res);
-    //   .select("-_id");
+    const users = await User.find().select("-password").csv(res);
   } catch (err) {
     const error = new Error("There are no users");
     error.code = "400";
@@ -63,28 +64,35 @@ userRoutes.get("/csv", async (req, res, next) => {
 
 //POST //api/users
 //REGISTER A USER
-userRoutes.post("/", async (req, res, next) => {
-  try {
-    const newUser = new User(req.body);
-    const savedUser = await newUser.save();
-    const email = await sendEmail(newUser);
-    res.status(200).send({ savedUser });
-  } catch (err) {
-    if (err.code === 11000)
-      return next(new Error(`${Object.keys(err.keyValue)} already exist"`));
-    const error = new Error("It was not possible to register a new user");
-    error.code = "400";
-    next(error);
-  }
-});
 
-//POST //api/users
+userRoutes.post(
+  "/",
+  validation(valSchema.userSchema),
+  async (req, res, next) => {
+    try {
+      const newUser = new User(req.body);
+      const savedUser = await newUser.save();
+      const email = await sendEmail(newUser);
+      res.status(200).send({ savedUser });
+    } catch (err) {
+      if (err.code === 11000)
+        return next(new Error(`${Object.keys(err.keyValue)} already exist"`));
+      const error = new Error("It was not possible to register a new user");
+      error.code = "400";
+      next(error);
+    }
+p
+  }
+);
+
+//POST //api/users/upload
 //REGISTER A USER
 userRoutes.post(
-  "/:id/upload",
+  "/upload",
+  auth,
   userParser.single("image"),
   async (req, res, next) => {
-    const { id } = req.params;
+    const { id } = req.user;
     try {
       const image = req.file && req.file.path; // add the single
       const editedUser = await User.findByIdAndUpdate(
@@ -98,17 +106,17 @@ userRoutes.post(
       res.status(200).send({ editedUser });
     } catch (err) {
       console.log(err);
-      const error = new Error("It was not possible to register a new user");
+      const error = new Error("It was not possible to insert the user image");
       error.code = "400";
       next(error);
     }
   }
 );
 
-//PUT //api/users
+//PUT /api/users/
 //EDIT A USER
-userRoutes.put("/:id", async (req, res, next) => {
-  const { id } = req.params;
+userRoutes.put("/", auth, async (req, res, next) => {
+  const { id } = req.user;
   try {
     const editedUser = await User.findByIdAndUpdate(id, req.body, {
       runValidators: true,
@@ -123,23 +131,45 @@ userRoutes.put("/:id", async (req, res, next) => {
   }
 });
 
-//DELETE /api/users/:userId
-//DELETE a user
-userRoutes.delete("/:id", async (req, res, next) => {
+//PUT /api/users/
+//EDIT A USER
+userRoutes.put("/:id", async (req, res, next) => {
+  const { id } = req.params.id;
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const editedUser = await User.findByIdAndUpdate(id, req.body, {
+      runValidators: true,
+      new: true,
+    });
+    res.status(200).send({ editedUser });
+  } catch (err) {
+    console.log(err);
+    const error = new Error("It was not possible to register a new user");
+    error.code = "400";
+    next(error);
+  }
+});
+
+//DELETE /api/users
+//DELETE a user
+userRoutes.delete("/", async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndDelete(req.user.id);
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There eas a problem deleting this user");
   }
 });
 
-// /users/follow/:followId
+//POST /users/follow/:followId
 //POST follow a user
-userRoutes.post("/follow/:followId", async (req, res, next) => {
+userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const { userId } = req.body;
+    const { userId } = req.user.id;
+    if (!(await User.findById(followId)))
+      return next(
+        new Error("The user you are trying to follow, does not exist")
+      );
 
     const user = await User.findByIdAndUpdate(
       userId,
@@ -164,10 +194,10 @@ userRoutes.post("/follow/:followId", async (req, res, next) => {
 
 //PUT //api/users/:userId/unfollow/:followId
 //UNFOLLOW AN USER
-userRoutes.put("/unfollow/:followId", async (req, res, next) => {
+userRoutes.put("/unfollow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const { userId } = req.body;
+    const { userId } = req.user.id;
 
     const following = await User.findByIdAndUpdate(
       userId,
@@ -184,7 +214,7 @@ userRoutes.put("/unfollow/:followId", async (req, res, next) => {
     });
     res.status(201).send({ following });
   } catch (err) {
-    const error = new Error("There was a problem unfollowing this user");
+    const error = new Error("You cannot unfollow this user");
     error.code = "400";
     next(error);
   }
@@ -194,98 +224,12 @@ userRoutes.put("/unfollow/:followId", async (req, res, next) => {
 //GET ALL USERS
 userRoutes.get("/:id", async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select("-password");
     res.status(200).send({ user });
   } catch (err) {
-    const error = new Error("There are no users");
-  }
-});
-//POST / / api/users/login;
-//LOGIN
-userRoutes.post("/login", async (req, res, next) => {
-  try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
-    const validPass = await user.comparePass(password);
-    if (validPass) {
-      const accessToken = jwt.sign(
-        { id: user._id, username: user.username },
-        TOKEN_SECRET,
-        {
-          expiresIn: "1h",
-        }
-      );
-      const refreshToken = jwt.sign(
-        { id: user._id, username: user.username },
-        RETOKEN_SECRET,
-        {
-          expiresIn: "6d",
-        }
-      );
-      const saveReToken = new RefreshToken({ token: refreshToken });
-      await saveReToken.save();
-
-      // res.header("auth-token", accessToken);
-      res.cookie("token", accessToken, {
-        // expires: new Date(Date.now() + expiration),
-        secure: false, // set to true if your using https
-        httpOnly: true,
-      });
-      res.cookie("refreshToken", refreshToken, {
-        secure: false, // set to true if your using https
-        httpOnly: true,
-      });
-
-      res.send({ accessToken, refreshToken, expiresIn: Date.now() + 3600000 });
-    } else next(new Error("Username or password is wrong"));
-    res.status(200).send({ validPass });
-  } catch (err) {
-    console.log(err);
-    const error = new Error("It was not possible to login ");
-    error.code = "400";
-    next(error);
+    const error = new Error("There is no user with this id");
   }
 });
 
-//POST / / api / users / login;
-//LOGIN
-userRoutes.post("/renewToken", async (req, res, next) => {
-  try {
-    const { refreshToken } = req.cookies;
-    const token = RefreshToken.findOne({ token: refreshToken });
-    if (!refreshToken || !token) return next(new Error("Unauthorized"));
-    const user = await jwt.verify(refreshToken, RETOKEN_SECRET);
-    const accessToken = await jwt.sign(user, TOKEN_SECRET);
-    res.cookie("token", accessToken, {
-      // expires: new Date(Date.now() + expiration),
-      secure: false, // set to true if your using https
-      httpOnly: true,
-    });
-    res.status(200).json(" credential renewed");
-  } catch (err) {
-    console.log(err);
-    const error = new Error("Unauthorized ");
-    error.code = "404";
-    next(error);
-  }
-});
-
-//POST / / api / users / login;
-//LOGIN
-userRoutes.delete("/auth/logout", async (req, res, next) => {
-  try {
-    const { refreshToken } = req.cookies.refreshToken;
-    const token = RefreshToken.findOneAndDelete({ token: refreshToken });
-    res.clearCookie("refreshToekn");
-    res.clearCookie("token");
-
-    res.status(200).send("logged out");
-  } catch (err) {
-    console.log(err);
-    const error = new Error("Unauthorized ");
-    error.code = "404";
-    next(error);
-  }
-});
 
 module.exports = userRoutes;
