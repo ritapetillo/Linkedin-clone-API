@@ -57,8 +57,9 @@ experiencesRouter.post(
       if (!currentUser)
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const newExperiences = new ExperienceModel(req.body);
+      newExperiences.userId = user.id;
       const { _id } = await newExperiences.save();
-      const userModified = await UserModel.findByIdAndUpdate(userId, {
+      const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { experiences: _id },
       });
       res.status(201).json({ data: `Experience with ${_id} added` });

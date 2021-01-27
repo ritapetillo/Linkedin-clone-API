@@ -57,13 +57,14 @@ educationRouter.post(
       if (!currentUser)
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const newEducation = new EducationModel(req.body);
+      newEducation.userId = user.id
       const { _id } = await newEducation.save();
-      const userModified = await UserModel.findByIdAndUpdate(userId, {
+      const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { education: _id },
       });
       res
         .status(201)
-        .json({ data: `Education with ID ${_id} added to user ${userId}` });
+        .json({ data: `Education with ID ${_id} added` });
     } catch (error) {
       console.log(error);
       next(error);

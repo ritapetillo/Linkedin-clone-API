@@ -7,8 +7,8 @@ const SkillSchema = new Schema({
     },
     userId: {
         type: String,
-        required: false,
-      },
+        required: true,
+    },
 });
 
 const SkillModel = model("Skills", SkillSchema);
