@@ -272,7 +272,6 @@ router.delete("/:cid/replies/:rid", auth, async (req, res, next) => {
   }
 });
 
-// /comments/:cid/replies/:rid/upload
 // router.post(
 //   "/:cid/replies/:rid/upload",
 //   commentParser.single("image"),
@@ -291,5 +290,39 @@ router.delete("/:cid/replies/:rid", auth, async (req, res, next) => {
 //     }
 //   }
 // );
+
+// /comments/:cid/replies/:rid/upload
+router.post("/:cid/replies/:rid/upload", commentParser.single("image"), async (req, res, next) => {
+  try {
+    const { replies } = await CommentsModel.findById(req.params.cid, {
+      _id: 0,
+      replies: {
+        $elemMatch: {
+          _id: req.params.rid,
+        },
+      },
+    });
+
+    console.log("reply user id:::::::::::", replies[0].user[0]);
+
+      try {
+        const img = req.file && req.file.path;
+        const replyToUpdate = { ...replies[0].toObject(), img };
+        console.log("reply to update:::::::", replyToUpdate);
+        const modifiedReply = await CommentsModel.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(req.params.cid),
+            "replies._id": mongoose.Types.ObjectId(req.params.rid),
+          },
+          { $set: { "replies.$": replyToUpdate } }
+        );
+      } catch (e) {
+        console.log(e)
+      }
+      res.status(200).send("reply modified successfully!");
+  } catch (error) {
+    console.log(error)
+  }
+});
 
 module.exports = router;
