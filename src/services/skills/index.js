@@ -95,7 +95,7 @@ skillsRouter.delete("/:skillId", auth, async (req, res, next) => {
     const { userId } = skill;
     if (skill) {
       const userModified = await UserModel.findByIdAndUpdate(
-        { userId },
+        userId,
         { $pull: { skills: skillId } }
       );
       res.status(201).json({ data: `Skill with ID ${skillId} deleted` });

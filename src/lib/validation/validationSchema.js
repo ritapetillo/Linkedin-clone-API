@@ -37,7 +37,6 @@ const schemas = {
     activtiesSocieties: Joi.string(),
     description: Joi.string().required(),
     userId: Joi.string(),
-
   }),
   PostSchema: Joi.object().keys({
 text: Joi.string().required(),
@@ -49,7 +48,6 @@ text: Joi.string().required(),
   skillSchema: Joi.object().keys({
     text: Joi.string().required(),
     userId: Joi.string(),
-
   }),
 };
 

@@ -132,7 +132,7 @@ try {
     const { userId } = experience;
     if (experience) {
       const userModified = await UserModel.findByIdAndUpdate(
-        { userId },
+        userId,
         { $pull: { experiences: experienceId } }
       );
       res
