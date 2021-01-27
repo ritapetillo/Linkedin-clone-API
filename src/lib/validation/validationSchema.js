@@ -11,7 +11,8 @@ const schemas = {
     password: Joi.string().min(6).required(),
   }),
   commentSchema: Joi.object().keys({
-    text: Joi.string()
+    text: Joi.string().required(),
+    user: Joi.string().required()
   }),
   experienceSchema: Joi.object().keys({
     role: Joi.string().required(),
@@ -37,6 +38,9 @@ const schemas = {
     img:Joi.string(),
     user:Joi.string(),
     comments:Joi.string(),
+  }),
+  skillSchema: Joi.object().keys({
+    text: Joi.string().required(),
   }),
 };
 
