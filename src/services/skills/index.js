@@ -31,8 +31,6 @@ skillsRouter.get("/:skillId", async (req, res, next) => {
   }
 });
 
-
-
 skillsRouter.post(
   "/:userId",
   validationMiddleware(schemas.skillSchema),
@@ -41,7 +39,6 @@ skillsRouter.post(
       const newSkill = new SkillModel(req.body);
       const { _id } = await newSkill.save();
       const { userId } = req.params;
-      const response = await UserModel.findById(userId);
       if (response) {
         const user = await UserModel.findByIdAndUpdate(userId, {
           $push: { skills: _id },
@@ -59,21 +56,15 @@ skillsRouter.post(
   }
 );
 
-
 skillsRouter.put(
   "/:skillId",
   validationMiddleware(schemas.skillSchema),
   async (req, res, next) => {
     const { skillId } = req.params;
     try {
-      const skill = await SkillModel.findByIdAndUpdate(
-        skillId,
-        req.body
-      );
+      const skill = await SkillModel.findByIdAndUpdate(skillId, req.body);
       if (skill) {
-        res
-          .status(201)
-          .json({ data: `Skill with ID ${skillId} updated` });
+        res.status(201).json({ data: `Skill with ID ${skillId} updated` });
       } else {
         throw new ApiError(404, `No skill with ID ${skillId} found`);
       }
@@ -89,16 +80,12 @@ skillsRouter.delete("/:skillId", async (req, res, next) => {
   try {
     const skill = await SkillModel.findByIdAndDelete(skillId);
     const { userId } = experience;
-    const _id = userId
-    const user = await UserModel.findOneAndUpdate(
-      { _id },
-      { $pull: { skills: skillId } }
-    );
-
-    if (experience) {
-      res
-        .status(201)
-        .json({ data: `Skill with ID ${skillId} deleted` });
+    if (skill) {
+      const user = await UserModel.findByIdAndUpdate(
+        { userId },
+        { $pull: { skills: skillId } }
+      );
+      res.status(201).json({ data: `Skill with ID ${skillId} deleted` });
     } else {
       throw new ApiError(404, `No skill with ID ${skillId} found`);
     }

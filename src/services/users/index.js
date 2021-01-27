@@ -6,6 +6,7 @@ const sendEmail = require("../../lib/utils/email");
 const userParser = require("../../lib/utils/cloudinary/users");
 const expRoutes = require("../experiences/index");
 const edRoutes = require("../education/index");
+const skillRoutes = require("../skills/index");
 const jwt = require("jsonwebtoken");
 const { TOKEN_SECRET } = process.env;
 const { RETOKEN_SECRET } = process.env;
@@ -13,6 +14,7 @@ const auth = require("../../lib/utils/privateRoutes");
 
 userRoutes.use("/experiences", expRoutes);
 userRoutes.use("/education", edRoutes);
+userRoutes.use("/skills", skillRoutes);
 
 //GET //api/users
 //GET ALL USERS
@@ -68,7 +70,6 @@ userRoutes.post("/", async (req, res, next) => {
     const email = await sendEmail(newUser);
     res.status(200).send({ savedUser });
   } catch (err) {
-    console.log(err.code + Object.keys(err.keyValue));
     if (err.code === 11000)
       return next(new Error(`${Object.keys(err.keyValue)} already exist"`));
     const error = new Error("It was not possible to register a new user");
