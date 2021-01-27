@@ -4,6 +4,7 @@ const CommentsModel = require("../../models/Comment.js");
 const commentParser = require("../../lib/utils/cloudinary/comments");
 const q2m = require("query-to-mongo")
 const mongoose = require("mongoose")
+const auth = require("../../lib/utils/privateRoutes");
 
 router.post("/", async (req, res, next) => {
   try {
@@ -45,10 +46,11 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.put("/:id/user/:uid", async (req, res, next) => {
+router.put("/:id/", auth, async (req, res, next) => {
   try {
+    const user = req.user.id;
     const commentToUpdate = await CommentsModel.findById(req.params.id);
-    if (commentToUpdate.user[0] == req.params.uid) {
+    if (commentToUpdate.user[0] == user) {
       try {
         const comment = await CommentsModel.findByIdAndUpdate(
           req.params.id,
@@ -81,10 +83,11 @@ router.put("/:id/user/:uid", async (req, res, next) => {
   }
 });
 
-router.delete("/:id/user/:uid", async (req, res, next) => {
+router.delete("/:id/", auth, async (req, res, next) => {
   try {
+    const user = req.user.id;
     const commmentToDelete = await CommentsModel.findById(req.params.id);
-    if (commmentToDelete.user[0] == req.params.uid) {
+    if (commmentToDelete.user[0] == user) {
       try {
         const comment = await CommentsModel.findByIdAndDelete(req.params.id);
         if (comment) {
@@ -147,10 +150,10 @@ router.get("/:id/replies", async (req, res, next) => {
 });
 
 // /comments/:id/replies POST
-router.post("/:id/replies", async (req, res, next) => {
+router.post("/:id/replies", auth, async (req, res, next) => {
   try {
+    const replyAuthorId = req.user.id
     const replyText = req.body.text;
-    const replyAuthorId = req.body.user;
 
     const replyToInsert = {
       text: replyText,
@@ -181,10 +184,10 @@ router.post("/:id/replies", async (req, res, next) => {
   }
 });
 
-//   /comments/:cid/replies/:rid/user/:uid
-// DOESNT WORK 
-router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
+//   /comments/:cid/replies/:rid
+router.put("/:cid/replies/:rid", auth, async (req, res, next) => {
   try {
+    const user = req.user.id;
     const { replies } = await CommentsModel.findById(req.params.cid, {
       _id: 0,
       replies: {
@@ -196,7 +199,7 @@ router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
 
     console.log("reply user id:::::::::::", replies[0].user[0]);
 
-    if (replies && replies.length > 0 && req.params.uid == replies[0].user[0]) {
+    if (replies && replies.length > 0 && user == replies[0].user[0]) {
       const replyToUpdate = { ...replies[0].toObject(), ...req.body };
       console.log("reply to update:::::::", replyToUpdate);
       try {
@@ -214,7 +217,7 @@ router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
       } catch (e) {
         console.log(e)
       }
-      res.status(200).send("reply modied successfully!");
+      res.status(200).send("reply modified successfully!");
     } else {
       const error = new Error("Couldnt update reply with id=", req.params.rid);
       next(error);
@@ -224,9 +227,10 @@ router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
   }
 });
 
-// /comments/:cid/replies/:rid/user/:uid
-router.delete("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
+// /comments/:cid/replies/:rid
+router.delete("/:cid/replies/:rid", auth, async (req, res, next) => {
   try {
+    const user = req.user.id;
     const { replies } = await CommentsModel.findById(req.params.cid, {
       _id: 0,
       replies: {
@@ -242,7 +246,7 @@ router.delete("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
       req.params.uid
     );
 
-    if (replies[0].user[0] == req.params.uid) {
+    if (replies[0].user[0] == user) {
       try {
         const modifiedReply = await CommentsModel.findByIdAndUpdate(
           req.params.cid,
