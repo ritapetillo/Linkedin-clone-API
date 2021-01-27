@@ -3,6 +3,7 @@ const router = express.Router();
 const CommentsModel = require("../../models/Comment.js");
 const commentParser = require("../../lib/utils/cloudinary/comments");
 const q2m = require("query-to-mongo")
+const mongoose = require("mongoose")
 
 router.post("/", async (req, res, next) => {
   try {
@@ -204,21 +205,22 @@ router.put("/:cid/replies/:rid/user/:uid", async (req, res, next) => {
             _id: mongoose.Types.ObjectId(req.params.cid),
             "replies._id": mongoose.Types.ObjectId(req.params.rid),
           },
-          { $set: { "replies.$": replyToUpdate } }
+          { $set: { "replies.$": replyToUpdate } },
+          {
+            runValidators: true,
+            new: true
+          }
         );
-        console.log("modifiedReply:::::::", modifiedReply);
       } catch (e) {
-        const err = new Error("nooooooooooooooooo");
-        next(err);
+        console.log(e)
       }
-      res.status(200).send(modifiedReply);
+      res.status(200).send("reply modied successfully!");
     } else {
       const error = new Error("Couldnt update reply with id=", req.params.rid);
       next(error);
     }
   } catch (error) {
-    const err = new Error("hereeeeeeeeeeeeeeeeeee");
-    next(err);
+    console.log(error)
   }
 });
 
