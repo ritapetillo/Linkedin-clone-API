@@ -20,10 +20,10 @@ router.get("/", async (req, res, next) => {
     const query = q2m(req.query)
     const total = await CommentsModel.countDocuments(query.criteria)
     const comment = await CommentsModel.find(query.criteria, query.options.fields)
-          .sort(query.options.sort)
-          .skip(query.options.skip)
-          .limit(query.options.limit)
-    res.send({links: query.links("/comments", total), comment});
+      .sort(query.options.sort)
+      .skip(query.options.skip)
+      .limit(query.options.limit)
+    res.send({ links: query.links("/comments", total), comment });
   } catch (error) {
     console.log(error);
     next(error);
@@ -170,7 +170,7 @@ router.post("/:id/replies", async (req, res, next) => {
           new: true,
         }
       );
-    res.status(201).send(updatedComment);
+      res.status(201).send(updatedComment);
     } else {
       throw new Error();
     }
