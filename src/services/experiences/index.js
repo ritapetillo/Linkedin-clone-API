@@ -58,7 +58,7 @@ experiencesRouter.post(
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const newExperiences = new ExperienceModel(req.body);
       const { _id } = await newExperiences.save();
-      const user = await UserModel.findByIdAndUpdate(userId, {
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
         $push: { experiences: _id },
       });
       res.status(201).json({ data: `Experience with ${_id} added` });
@@ -134,7 +134,7 @@ experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
     const experience = await ExperienceModel.findByIdAndDelete(experienceId);
     const { userId } = experience;
     if (experience) {
-      const user = await UserModel.findByIdAndUpdate(
+      const userModified = await UserModel.findByIdAndUpdate(
         { userId },
         { $pull: { experiences: experienceId } }
       );

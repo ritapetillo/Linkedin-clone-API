@@ -58,7 +58,7 @@ educationRouter.post(
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const newEducation = new EducationModel(req.body);
       const { _id } = await newEducation.save();
-      const user = await UserModel.findByIdAndUpdate(userId, {
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
         $push: { education: _id },
       });
       res
@@ -98,16 +98,20 @@ educationRouter.post(
 );
 
 educationRouter.put(
-  "/:educationId",
+  "/:educationId", auth,
   validationMiddleware(schemas.educationSchema),
   async (req, res, next) => {
     const { educationId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const education = await EducationModel.findByIdAndUpdate(
         educationId,
         req.body
       );
-      if (education) {
+      if (education && currentUser) {
         res
           .status(201)
           .json({ data: `Education with ID ${educationId} updated` });
@@ -131,7 +135,7 @@ educationRouter.delete("/:educationId", auth, async (req, res, next) => {
     const education = await EducationModel.findByIdAndDelete(educationId);
     const { userId } = education;
     if (education) {
-      const user = await UserModel.findByIdAndUpdate(
+      const userModified = await UserModel.findByIdAndUpdate(
         { userId },
         { $pull: { education: educationId } }
       );
