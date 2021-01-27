@@ -137,7 +137,7 @@ educationRouter.delete("/:educationId", auth, async (req, res, next) => {
     const { userId } = education;
     if (education) {
       const userModified = await UserModel.findByIdAndUpdate(
-        { userId },
+        userId,
         { $pull: { education: educationId } }
       );
       res
