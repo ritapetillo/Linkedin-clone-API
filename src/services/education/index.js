@@ -6,6 +6,7 @@ const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const edParser = require("../../lib/utils/cloudinary/education.js");
 const UserModel = require("../../models/User");
+const auth = require("../../lib/utils/privateRoutes");
 
 educationRouter.get("/", async (req, res, next) => {
   try {
@@ -46,21 +47,20 @@ educationRouter.get("/csv", async (req, res, next) => {
 });
 
 educationRouter.post(
-  "/:userId",
+  "/",
+  auth,
   validationMiddleware(schemas.educationSchema),
   async (req, res, next) => {
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const newEducation = new EducationModel(req.body);
       const { _id } = await newEducation.save();
-      const { userId } = req.params;
-      const response = await UserModel.findById(userId);
-      if (response) {
-        const user = await UserModel.findByIdAndUpdate(userId, {
-          $push: { education: _id },
-        });
-      } else {
-        throw new ApiError(404, `No User ID ${userId} found`);
-      }
+      const user = await UserModel.findByIdAndUpdate(userId, {
+        $push: { education: _id },
+      });
       res
         .status(201)
         .json({ data: `Education with ID ${_id} added to user ${userId}` });
@@ -73,11 +73,15 @@ educationRouter.post(
 
 educationRouter.post(
   "/:educationId/picture",
+  auth,
   edParser.single("image"),
-
   async (req, res, next) => {
     const { educationId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const image = req.file && req.file.path;
       const updateEducation = await EducationModel.findByIdAndUpdate(
         educationId,
@@ -117,9 +121,13 @@ educationRouter.put(
   }
 );
 
-educationRouter.delete("/:educationId", async (req, res, next) => {
+educationRouter.delete("/:educationId", auth, async (req, res, next) => {
   const { educationId } = req.params;
+  const user = req.user;
   try {
+    const currentUser = await UserModel.findById(user.id);
+    if (!currentUser)
+      throw new ApiError(403, `Only the owner of this profile can edit`);
     const education = await EducationModel.findByIdAndDelete(educationId);
     const { userId } = education;
     if (education) {
