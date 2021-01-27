@@ -5,6 +5,11 @@ const sendEmail = require("../../lib/utils/email");
 const userParser = require("../../lib/utils/cloudinary/users");
 const expRoutes = require("../experiences/index");
 const edRoutes = require("../education/index");
+const skillRoutes = require("../skills/index");
+const jwt = require("jsonwebtoken");
+const { TOKEN_SECRET } = process.env;
+const { RETOKEN_SECRET } = process.env;
+
 const auth = require("../../lib/utils/privateRoutes");
 const validation = require("../../lib/validation/validationMiddleware");
 const valSchema = require("../../lib/validation/validationSchema");
@@ -12,6 +17,7 @@ const valSchema = require("../../lib/validation/validationSchema");
 
 userRoutes.use("/experiences", expRoutes);
 userRoutes.use("/education", edRoutes);
+userRoutes.use("/skills", skillRoutes);
 
 //GET /api/users
 //GET ALL USERS
@@ -58,6 +64,7 @@ userRoutes.get("/csv", async (req, res, next) => {
 
 //POST //api/users
 //REGISTER A USER
+
 userRoutes.post(
   "/",
   validation(valSchema.userSchema),
@@ -74,6 +81,7 @@ userRoutes.post(
       error.code = "400";
       next(error);
     }
+p
   }
 );
 

@@ -62,7 +62,6 @@ postRouter.get("/:id", async(req,res,next)=>{
   }catch(err){
     res.status(400).send({err})
   }
-    
 })
 /* - PUT https://yourapi.herokuapp.com/api/posts/{postId}
 Edit a given post */

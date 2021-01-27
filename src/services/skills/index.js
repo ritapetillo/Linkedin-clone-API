@@ -5,6 +5,7 @@ const skillsRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const UserModel = require("../../models/User");
+const auth = require("../../lib/utils/privateRoutes");
 
 skillsRouter.get("/", async (req, res, next) => {
   try {
@@ -31,27 +32,22 @@ skillsRouter.get("/:skillId", async (req, res, next) => {
   }
 });
 
-
-
 skillsRouter.post(
-  "/:userId",
+  "/",
+  auth,
   validationMiddleware(schemas.skillSchema),
   async (req, res, next) => {
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const newSkill = new SkillModel(req.body);
       const { _id } = await newSkill.save();
-      const { userId } = req.params;
-      const response = await UserModel.findById(userId);
-      if (response) {
-        const user = await UserModel.findByIdAndUpdate(userId, {
-          $push: { skills: _id },
-        });
-      } else {
-        throw new ApiError(404, `No User ID ${userId} found`);
-      }
-      res
-        .status(201)
-        .json({ data: `Skill with ID ${_id} added to user ${userId}` });
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
+        $push: { skills: _id },
+      });
+      res.status(201).json({ data: `Skill with ID ${_id} added` });
     } catch (error) {
       console.log(error);
       next(error);
@@ -59,21 +55,20 @@ skillsRouter.post(
   }
 );
 
-
 skillsRouter.put(
   "/:skillId",
+  auth,
   validationMiddleware(schemas.skillSchema),
   async (req, res, next) => {
     const { skillId } = req.params;
+    const user = req.user;
     try {
-      const skill = await SkillModel.findByIdAndUpdate(
-        skillId,
-        req.body
-      );
-      if (skill) {
-        res
-          .status(201)
-          .json({ data: `Skill with ID ${skillId} updated` });
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
+      const skill = await SkillModel.findByIdAndUpdate(skillId, req.body);
+      if (skill && currentUser) {
+        res.status(201).json({ data: `Skill with ID ${skillId} updated` });
       } else {
         throw new ApiError(404, `No skill with ID ${skillId} found`);
       }
@@ -84,22 +79,23 @@ skillsRouter.put(
   }
 );
 
-skillsRouter.delete("/:skillId", async (req, res, next) => {
+skillsRouter.delete("/:skillId", auth, async (req, res, next) => {
   const { skillId } = req.params;
+  const user = req.user;
   try {
-    const experience = await SkillModel.findByIdAndDelete(skillId);
-    const { username } = experience;
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: skillId } }
-    );
-
-    if (experience) {
-      res
-        .status(201)
-        .json({ data: `Experience with ID ${skillId} deleted` });
+    const currentUser = await UserModel.findById(user.id);
+    if (!currentUser)
+      throw new ApiError(403, `Only the owner of this profile can edit`);
+    const skill = await SkillModel.findByIdAndDelete(skillId);
+    const { userId } = experience;
+    if (skill) {
+      const userModified = await UserModel.findByIdAndUpdate(
+        { userId },
+        { $pull: { skills: skillId } }
+      );
+      res.status(201).json({ data: `Skill with ID ${skillId} deleted` });
     } else {
-      throw new ApiError(404, `No experience with ID ${skillId} found`);
+      throw new ApiError(404, `No skill with ID ${skillId} found`);
     }
   } catch (error) {
     console.log(error);

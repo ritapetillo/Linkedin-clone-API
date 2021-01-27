@@ -6,6 +6,7 @@ const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const expParser = require("../../lib/utils/cloudinary/experiences");
 const UserModel = require("../../models/User");
+const auth = require("../../lib/utils/privateRoutes");
 
 experiencesRouter.get("/", async (req, res, next) => {
   try {
@@ -32,7 +33,6 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   }
 });
 
-
 experiencesRouter.get("/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
@@ -47,24 +47,21 @@ experiencesRouter.get("/csv", async (req, res, next) => {
 });
 
 experiencesRouter.post(
-  "/:userId",
+  "/",
+  auth,
   validationMiddleware(schemas.experienceSchema),
   async (req, res, next) => {
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const newExperiences = new ExperienceModel(req.body);
       const { _id } = await newExperiences.save();
-      const { userId } = req.params;
-      const response = await UserModel.findById(userId);
-      if (response) {
-        const user = await UserModel.findByIdAndUpdate(userId, {
-          $push: { experiences: _id },
-        });
-      } else {
-        throw new ApiError(404, `No User ID ${userId} found`);
-      }
-      res
-        .status(201)
-        .json({ data: `Experience with ${_id} added to user ${userId}` });
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
+        $push: { experiences: _id },
+      });
+      res.status(201).json({ data: `Experience with ${_id} added` });
     } catch (error) {
       console.log(error);
       next(error);
@@ -74,10 +71,15 @@ experiencesRouter.post(
 
 experiencesRouter.post(
   "/:experienceId/picture",
+  auth,
   expParser.single("image"),
   async (req, res, next) => {
     const { experienceId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const image = req.file && req.file.path;
       const updateExperience = await ExperienceModel.findByIdAndUpdate(
         experienceId,
@@ -95,15 +97,20 @@ experiencesRouter.post(
 
 experiencesRouter.put(
   "/:experienceId",
+  auth,
   validationMiddleware(schemas.experienceSchema),
   async (req, res, next) => {
     const { experienceId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const experience = await ExperienceModel.findByIdAndUpdate(
         experienceId,
         req.body
       );
-      if (experience) {
+      if (experience && currentUser) {
         res
           .status(201)
           .json({ data: `Experience with ID ${experienceId} updated` });
@@ -117,17 +124,20 @@ experiencesRouter.put(
   }
 );
 
-experiencesRouter.delete("/:experienceId", async (req, res, next) => {
+experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
   const { experienceId } = req.params;
+  const user = req.user;
   try {
+    const currentUser = await UserModel.findById(user.id);
+    if (!currentUser)
+      throw new ApiError(403, `Only the owner of this profile can edit`);
     const experience = await ExperienceModel.findByIdAndDelete(experienceId);
-    const { username } = experience;
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: experienceId } }
-    );
-
+    const { userId } = experience;
     if (experience) {
+      const userModified = await UserModel.findByIdAndUpdate(
+        { userId },
+        { $pull: { experiences: experienceId } }
+      );
       res
         .status(201)
         .json({ data: `Experience with ID ${experienceId} deleted` });

@@ -6,6 +6,7 @@ const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const edParser = require("../../lib/utils/cloudinary/education.js");
 const UserModel = require("../../models/User");
+const auth = require("../../lib/utils/privateRoutes");
 
 educationRouter.get("/", async (req, res, next) => {
   try {
@@ -32,7 +33,6 @@ educationRouter.get("/:educationId", async (req, res, next) => {
   }
 });
 
-
 educationRouter.get("/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
@@ -47,21 +47,20 @@ educationRouter.get("/csv", async (req, res, next) => {
 });
 
 educationRouter.post(
-  "/:userId",
+  "/",
+  auth,
   validationMiddleware(schemas.educationSchema),
   async (req, res, next) => {
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const newEducation = new EducationModel(req.body);
       const { _id } = await newEducation.save();
-      const { userId } = req.params;
-      const response = await UserModel.findById(userId);
-      if (response) {
-        const user = await UserModel.findByIdAndUpdate(userId, {
-          $push: { education: _id },
-        });
-      } else {
-        throw new ApiError(404, `No User ID ${userId} found`);
-      }
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
+        $push: { education: _id },
+      });
       res
         .status(201)
         .json({ data: `Education with ID ${_id} added to user ${userId}` });
@@ -72,14 +71,17 @@ educationRouter.post(
   }
 );
 
-
 educationRouter.post(
   "/:educationId/picture",
+  auth,
   edParser.single("image"),
-
   async (req, res, next) => {
     const { educationId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const image = req.file && req.file.path;
       const updateEducation = await EducationModel.findByIdAndUpdate(
         educationId,
@@ -96,16 +98,20 @@ educationRouter.post(
 );
 
 educationRouter.put(
-  "/:educationId",
+  "/:educationId", auth,
   validationMiddleware(schemas.educationSchema),
   async (req, res, next) => {
     const { educationId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const education = await EducationModel.findByIdAndUpdate(
         educationId,
         req.body
       );
-      if (education) {
+      if (education && currentUser) {
         res
           .status(201)
           .json({ data: `Education with ID ${educationId} updated` });
@@ -119,22 +125,25 @@ educationRouter.put(
   }
 );
 
-educationRouter.delete("/:educationId", async (req, res, next) => {
+educationRouter.delete("/:educationId", auth, async (req, res, next) => {
   const { educationId } = req.params;
+  const user = req.user;
   try {
-    const experience = await EducationModel.findByIdAndDelete(educationId);
-    const { username } = experience;
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: educationId } }
-    );
-
-    if (experience) {
+    const currentUser = await UserModel.findById(user.id);
+    if (!currentUser)
+      throw new ApiError(403, `Only the owner of this profile can edit`);
+    const education = await EducationModel.findByIdAndDelete(educationId);
+    const { userId } = education;
+    if (education) {
+      const userModified = await UserModel.findByIdAndUpdate(
+        { userId },
+        { $pull: { education: educationId } }
+      );
       res
         .status(201)
-        .json({ data: `Experience with ID ${educationId} deleted` });
+        .json({ data: `Education with ID ${educationId} deleted` });
     } else {
-      throw new ApiError(404, `No experience with ID ${educationId} found`);
+      throw new ApiError(404, `No education with ID ${educationId} found`);
     }
   } catch (error) {
     console.log(error);

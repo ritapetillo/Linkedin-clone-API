@@ -7,7 +7,6 @@ const authRoutes = require("./auth");
 
 router.use("/users", userRoutes);
 router.use("/comments", commentsRoutes);
-router.use("/users", userRoutes);
 router.use("/posts", postRoutes)
 router.use("/auth", authRoutes);
 
