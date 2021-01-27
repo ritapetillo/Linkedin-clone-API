@@ -26,7 +26,7 @@ const schemas = {
     endDate: Joi.date(),
     area: Joi.string().required(),
     image: Joi.string(),
-    username: Joi.string().required(),
+    userId: Joi.string(),
   }),
   educationSchema: Joi.object().keys({
     school: Joi.string().required(),
@@ -36,17 +36,20 @@ const schemas = {
     endYear: Joi.number().required(),
     activtiesSocieties: Joi.string(),
     description: Joi.string().required(),
+    userId: Joi.string(),
+
   }),
   PostSchema: Joi.object().keys({
-
-    text: Joi.string().required(),
+text: Joi.string().required(),
     img:Joi.string(),
-    user:Joi.string().required(),
     comments:Joi.string(),
+    userId: Joi.string(),
 
   }),
   skillSchema: Joi.object().keys({
     text: Joi.string().required(),
+    userId: Joi.string(),
+
   }),
 };
 

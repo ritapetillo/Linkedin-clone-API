@@ -22,7 +22,7 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
     const response = await ExperienceModel.findById(experienceId);
-    if (response == null) {
+    if (!response) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
       res.status(200).json({ data: response });
@@ -53,10 +53,7 @@ experiencesRouter.post(
   async (req, res, next) => {
     const user = req.user;
     try {
-      const currentUser = await UserModel.findById(user.id);
-      if (!currentUser)
-        throw new ApiError(403, `Only the owner of this profile can edit`);
-      const newExperiences = new ExperienceModel(req.body);
+const newExperiences = new ExperienceModel(req.body);
       newExperiences.userId = user.id;
       const { _id } = await newExperiences.save();
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
@@ -103,36 +100,35 @@ experiencesRouter.put(
   async (req, res, next) => {
     const { experienceId } = req.params;
     const user = req.user;
+    const experienceToEdit = await ExperienceModel.findById(experienceId);
+
     try {
-      const currentUser = await UserModel.findById(user.id);
-      if (!currentUser)
+      if (experienceToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const experience = await ExperienceModel.findByIdAndUpdate(
+      const updatedExpereince = await ExperienceModel.findByIdAndUpdate(
         experienceId,
-        req.body
-      );
-      if (experience && currentUser) {
+        req.body, {
+          runValidators: true,
+          new: true,
+        });
         res
-          .status(201)
-          .json({ data: `Experience with ID ${experienceId} updated` });
-      } else {
-        throw new ApiError(404, `No experience with ID ${experienceId} found`);
+        .status(201)
+        .json({ data: `Experience with ID ${experienceId} edited` });
+      } catch (error) {
+        console.log(error);
+        next(error);
       }
-    } catch (error) {
-      console.log(error);
-      next(error);
     }
-  }
-);
+  );
 
 experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
   const { experienceId } = req.params;
   const user = req.user;
-  try {
-    const currentUser = await UserModel.findById(user.id);
-    if (!currentUser)
-      throw new ApiError(403, `Only the owner of this profile can edit`);
-    const experience = await ExperienceModel.findByIdAndDelete(experienceId);
+  const experienceToDelete = await ExperienceModel.findById(id);
+try {
+  if (experienceToDelete.userId !== user.id)
+  throw new ApiError(403, `Only the owner of this profile can edit`);
+ const experience = await ExperienceModel.findByIdAndDelete(experienceId);
     const { userId } = experience;
     if (experience) {
       const userModified = await UserModel.findByIdAndUpdate(

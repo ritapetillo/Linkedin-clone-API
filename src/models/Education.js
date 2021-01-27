@@ -35,8 +35,7 @@ const EducationSchema = new Schema(
       type: String,
       required: false,
     },
-    userId: 
-    {
+    userId: {
       type: String,
       required: true,
     },

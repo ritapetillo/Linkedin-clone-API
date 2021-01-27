@@ -63,22 +63,26 @@ skillsRouter.put(
   async (req, res, next) => {
     const { skillId } = req.params;
     const user = req.user;
+    const skillToEdit = await Posts.findById(id);
+
     try {
-      const currentUser = await UserModel.findById(user.id);
-      if (!currentUser)
+      if (skillToEdit.id != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const skill = await SkillModel.findByIdAndUpdate(skillId, req.body);
-      if (skill && currentUser) {
-        res.status(201).json({ data: `Skill with ID ${skillId} updated` });
-      } else {
-        throw new ApiError(404, `No skill with ID ${skillId} found`);
+      const updatedExpereince = await SkillModel.findByIdAndUpdate(
+        skillId,
+        req.body, {
+          runValidators: true,
+          new: true,
+        });
+        res
+        .status(201)
+        .json({ data: `Skill with ID ${skillId} edited` });
+      } catch (error) {
+        console.log(error);
+        next(error);
       }
-    } catch (error) {
-      console.log(error);
-      next(error);
     }
-  }
-);
+  );
 
 skillsRouter.delete("/:skillId", auth, async (req, res, next) => {
   const { skillId } = req.params;

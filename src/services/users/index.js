@@ -156,7 +156,7 @@ userRoutes.delete("/", async (req, res, next) => {
     const user = await User.findByIdAndDelete(req.user.id);
     res.status(200).send({ user });
   } catch (err) {
-    const error = new Error("There eas a problem deleting this user");
+    const error = new Error("There was a problem deleting this user");
   }
 });
 

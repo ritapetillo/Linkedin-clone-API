@@ -41,7 +41,7 @@ authRoutes.post(
 
 //POST / / api /auth/renewToken;
 //RENEW TOKEN
-authRoutes.post("/auth/renewToken", refreshToken, async (req, res, next) => {
+authRoutes.post("/renewToken", refreshToken, async (req, res, next) => {
   try {
     res.status(200).json(" credential renewed");
   } catch (err) {
@@ -54,7 +54,7 @@ authRoutes.post("/auth/renewToken", refreshToken, async (req, res, next) => {
 
 //POST / / api / auth / logout;
 //LOGOUT
-authRoutes.post("/auth/logout", logout, async (req, res, next) => {
+authRoutes.post("/logout", logout, async (req, res, next) => {
   try {
     res.status(200).send("logged out");
   } catch (err) {
