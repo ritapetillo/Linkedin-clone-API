@@ -211,7 +211,7 @@ userRoutes.post("/login", async (req, res, next) => {
         { id: user._id, username: user.username },
         TOKEN_SECRET,
         {
-          expiresIn: "1h",
+          expiresIn: "1hr",
         }
       );
       const refreshToken = jwt.sign(
@@ -251,10 +251,13 @@ userRoutes.post("/login", async (req, res, next) => {
 userRoutes.post("/renewToken", async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
-    const token = RefreshToken.findOne({ token: refreshToken });
-    if (!refreshToken || !token) return next(new Error("Unauthorized"));
+    const token = await RefreshToken.findOne({ token: refreshToken });
+    if (!refreshToken) return next(new Error("Unauthorized"));
     const user = await jwt.verify(refreshToken, RETOKEN_SECRET);
-    const accessToken = await jwt.sign(user, TOKEN_SECRET);
+    const payload = { id: user.id, username: user.username };
+    const accessToken = await jwt.sign(payload, TOKEN_SECRET, {
+      expiresIn: "1hr",
+    });
     res.cookie("token", accessToken, {
       // expires: new Date(Date.now() + expiration),
       secure: false, // set to true if your using https
