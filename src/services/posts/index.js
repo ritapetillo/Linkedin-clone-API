@@ -4,7 +4,8 @@ const Posts = require("../../models/Post");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const schemas = require("../../lib/validation/validationSchema");
 const postsParser = require("../../lib/utils/cloudinary/posts");
-const cloudinary = require('cloudinary');
+const q2m = require("query-to-mongo")
+
 
 
 
@@ -12,14 +13,15 @@ const cloudinary = require('cloudinary');
 Retrieve posts */
 postRouter.get("/", async(req,res,next)=>{
     try {
-        await Posts.find().populate("user").exec(function (err, post) {
-          if (err){
-            console.log(err);
-          } else {
-            res.status(200).json(post);
-            console.log("success");
-          }
-        });
+      const query = q2m(req.query)
+      const allPosts = await Posts.countDocuments(query.criteria)
+      const Post = await Posts.find(query.criteria, query.options.fields)
+      .sort(query.options.sort)
+      .skip(query.options.skip)
+      .limit(query.options.limit)
+      .populate("user")
+      .populate("comments")
+      res.send({links: query.links("/api/posts", allPosts), Post});
       } catch (err) {
         const error = new Error("There are no Posts");
         error.code = "400";
@@ -46,7 +48,10 @@ Retrieves the specified post */
 postRouter.get("/:id", async(req,res,next)=>{
   const { id } = req.params
   try{
-    await Posts.findById(id).populate("user").populate("comments").exec(function (err, post) {
+    await Posts.findById(id)
+    .populate("user")
+    .populate("comments")
+    .exec(function (err, post) {
       if (err){
         console.log(err);
       } else {
