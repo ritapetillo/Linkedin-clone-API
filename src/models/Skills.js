@@ -6,6 +6,10 @@ const SkillSchema = new Schema({
         type: String,
         required: true,
     }
+    userId: {
+        type: String,
+        required: false,
+      },
 });
 
 const SkillModel = model("Skills", SkillSchema);

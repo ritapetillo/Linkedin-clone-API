@@ -121,13 +121,13 @@ experiencesRouter.delete("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
     const experience = await ExperienceModel.findByIdAndDelete(experienceId);
-    const { username } = experience;
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: experienceId } }
-    );
-
+    const { userId } = experience;
+    const _id = userId
     if (experience) {
+      const user = await UserModel.findOneAndUpdate(
+        { _id },
+        { $pull: { experiences: experienceId } }
+      );
       res
         .status(201)
         .json({ data: `Experience with ID ${experienceId} deleted` });

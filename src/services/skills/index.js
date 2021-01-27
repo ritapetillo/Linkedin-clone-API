@@ -87,19 +87,20 @@ skillsRouter.put(
 skillsRouter.delete("/:skillId", async (req, res, next) => {
   const { skillId } = req.params;
   try {
-    const experience = await SkillModel.findByIdAndDelete(skillId);
-    const { username } = experience;
+    const skill = await SkillModel.findByIdAndDelete(skillId);
+    const { userId } = experience;
+    const _id = userId
     const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: skillId } }
+      { _id },
+      { $pull: { skills: skillId } }
     );
 
     if (experience) {
       res
         .status(201)
-        .json({ data: `Experience with ID ${skillId} deleted` });
+        .json({ data: `Skill with ID ${skillId} deleted` });
     } else {
-      throw new ApiError(404, `No experience with ID ${skillId} found`);
+      throw new ApiError(404, `No skill with ID ${skillId} found`);
     }
   } catch (error) {
     console.log(error);

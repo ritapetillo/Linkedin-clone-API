@@ -32,7 +32,6 @@ educationRouter.get("/:educationId", async (req, res, next) => {
   }
 });
 
-
 educationRouter.get("/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
@@ -71,7 +70,6 @@ educationRouter.post(
     }
   }
 );
-
 
 educationRouter.post(
   "/:educationId/picture",
@@ -122,19 +120,19 @@ educationRouter.put(
 educationRouter.delete("/:educationId", async (req, res, next) => {
   const { educationId } = req.params;
   try {
-    const experience = await EducationModel.findByIdAndDelete(educationId);
-    const { username } = experience;
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: educationId } }
-    );
-
-    if (experience) {
+    const education = await EducationModel.findByIdAndDelete(educationId);
+    const { userId } = education;
+    const _id = userId;
+    if (education) {
+      const user = await UserModel.findOneAndUpdate(
+        { _id },
+        { $pull: { education: educationId } }
+      );
       res
         .status(201)
-        .json({ data: `Experience with ID ${educationId} deleted` });
+        .json({ data: `Education with ID ${educationId} deleted` });
     } else {
-      throw new ApiError(404, `No experience with ID ${educationId} found`);
+      throw new ApiError(404, `No education with ID ${educationId} found`);
     }
   } catch (error) {
     console.log(error);

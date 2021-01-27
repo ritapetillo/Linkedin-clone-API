@@ -7,14 +7,14 @@ const PostSchema = new Schema(
         type: String,
         required: true,
       },
-      user:{type: Schema.Types.ObjectId, ref: "User"},
+      user:{type: Schema.Types.ObjectId, ref: "users"},
       image: {
         type: String,
       },
       comments:
-        [{type: Schema.Types.ObjectId,ref:"comments"}]
+        [{type: Schema.Types.ObjectId,ref:"Comment"}]
     },
     { timestamps: true }
   );
 
-  module.exports = mongoose.model('Posts',PostSchema)
+  module.exports = mongoose.model("Posts",PostSchema)
