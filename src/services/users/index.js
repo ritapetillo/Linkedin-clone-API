@@ -157,7 +157,7 @@ userRoutes.delete("/", async (req, res, next) => {
 userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const { userId } = req.user.id;
+    const  userId  = req.user.id;
     if (!(await User.findById(followId)))
       return next(
         new Error("The user you are trying to follow, does not exist")
@@ -189,7 +189,7 @@ userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
 userRoutes.put("/unfollow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const { userId } = req.user.id;
+    const  userId  = req.user.id;
 
     const following = await User.findByIdAndUpdate(
       userId,
