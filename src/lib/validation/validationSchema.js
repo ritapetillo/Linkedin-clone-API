@@ -1,18 +1,22 @@
 const Joi = require("joi");
 const schemas = {
   userSchema: Joi.object().keys({
-    firstName: Joi.string().required(),
+    name: Joi.string().required(),
     lastName: Joi.string().required(),
+    username: Joi.string().required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
+    bio: Joi.string(),
+    title: Joi.string().min(6).required(),
+    area: Joi.string().required(),
   }),
   loginSchema: Joi.object().keys({
-    email: Joi.string().email().required(),
+    username: Joi.string().required(),
     password: Joi.string().min(6).required(),
   }),
   commentSchema: Joi.object().keys({
     text: Joi.string().required(),
-    user: Joi.string().required()
+    user: Joi.string().required(),
   }),
   experienceSchema: Joi.object().keys({
     role: Joi.string().required(),
@@ -22,7 +26,7 @@ const schemas = {
     endDate: Joi.date(),
     area: Joi.string().required(),
     image: Joi.string(),
-    username: Joi.string().required(),
+    userId: Joi.string(),
   }),
   educationSchema: Joi.object().keys({
     school: Joi.string().required(),
@@ -32,15 +36,18 @@ const schemas = {
     endYear: Joi.number().required(),
     activtiesSocieties: Joi.string(),
     description: Joi.string().required(),
-}),
+    userId: Joi.string(),
+  }),
   PostSchema: Joi.object().keys({
-    text: Joi.string().required(),
+text: Joi.string().required(),
     img:Joi.string(),
-    user:Joi.string().required(),
     comments:Joi.string(),
+    userId: Joi.string(),
+
   }),
   skillSchema: Joi.object().keys({
     text: Joi.string().required(),
+    userId: Joi.string(),
   }),
 };
 

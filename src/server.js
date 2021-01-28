@@ -24,7 +24,7 @@ server.use("/api", apiRoutes);
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
 // console.log(listEndpoints(server))
-// console.log("Endpoints:", listEndpoints(apiRoutes))
+
 //Connect to DB and server
 mongoose
   .connect(process.env.MONGO_URI, {
