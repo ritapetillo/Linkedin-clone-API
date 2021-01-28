@@ -13,19 +13,20 @@ Retrieve posts */
 postRouter.get("/", async (req, res, next) => {
   try {
     const query = q2m(req.query);
-    const allPosts = await Posts.countDocuments(query.criteria);
-    const Post = await Posts.find(query.criteria, query.options.fields)
+    const total = await Posts.countDocuments(query.criteria);
+    const post = await Posts.find(query.criteria, query.options.fields)
       .sort(query.options.sort)
       .skip(query.options.skip)
       .limit(query.options.limit)
       .populate("userId")
       .populate("comments");
-    res.send({ links: query.links("/api/posts", allPosts), Post });
+    res.send({ links: query.links("/posts", total), post });
   } catch (error) {
     console.log(error);
     next(error);
   }
 });
+
 
 /* - POST https://yourapi.herokuapp.com/api/posts/
 Creates a new post */
@@ -115,7 +116,7 @@ postRouter.delete("/:id", async (req, res, next) => {
 });
 /* - POST https://yourapi.herokuapp.com/api/posts/{postId}
 Add an image to the post under the name of "post" */
-postRouter.post("/:id", postsParser.single("img"), async (req, res, next) => {
+postRouter.post("/:id", postsParser.single("image"), async (req, res, next) => {
   const { id } = req.params;
   console.log(id);
   try {

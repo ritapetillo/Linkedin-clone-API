@@ -133,27 +133,29 @@ userRoutes.put("/", auth, async (req, res, next) => {
 
 //PUT /api/users/
 //EDIT A USER
-userRoutes.put("/:id", async (req, res, next) => {
-  const { id } = req.params.id;
-  try {
-    const editedUser = await User.findByIdAndUpdate(id, req.body, {
-      runValidators: true,
-      new: true,
-    });
-    res.status(200).send({ editedUser });
-  } catch (err) {
-    console.log(err);
-    const error = new Error("It was not possible to register a new user");
-    error.code = "400";
-    next(error);
-  }
-});
+// userRoutes.put("/:id", async (req, res, next) => {
+//   const { id } = req.params.id;
+//   try {
+//     const editedUser = await User.findByIdAndUpdate(id, req.body, {
+//       runValidators: true,
+//       new: true,
+//     });
+//     res.status(200).send({ editedUser });
+//   } catch (err) {
+//     console.log(err);
+//     const error = new Error("It was not possible to register a new user");
+//     error.code = "400";
+//     next(error);
+//   }
+// });
 
 //DELETE /api/users
 //DELETE a user
-userRoutes.delete("/", async (req, res, next) => {
+userRoutes.delete("/", auth, async (req, res, next) => {
+  const  userId  = req.user.id;
+
   try {
-    const user = await User.findByIdAndDelete(req.user.id);
+    const user = await User.findByIdAndDelete(userId);
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There was a problem deleting this user");
