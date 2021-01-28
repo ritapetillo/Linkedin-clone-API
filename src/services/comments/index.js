@@ -211,7 +211,7 @@ router.post(
   async (req, res, next) => {
     try {
       const replyAuthorId = req.user;
-      const replyText = req.body;
+      const replyText = req.body.text;
 
       const replyToInsert = {
         text: replyText,
