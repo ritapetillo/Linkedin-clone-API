@@ -90,7 +90,8 @@ postRouter.put(
         runValidators: true,
         new: true,
       });
-      res.status(200).send({ updatedPost });
+      const { id } = updatedPost;
+      res.status(200).send({ updatedPost, _id });
     } catch (error) {
       console.log(error);
       next(error);
@@ -120,27 +121,31 @@ postRouter.delete(
 );
 /* - POST https://yourapi.herokuapp.com/api/posts/{postId}
 Add an image to the post under the name of "post" */
-postRouter.post("/:id", postsParser.single("image"), async (req, res, next) => {
-  const { id } = req.params;
-  console.log(id);
-  try {
-    console.log("req.file", req.file);
-    const image = req.file && req.file.path;
-    const updatePosts = await Posts.findByIdAndUpdate(
-      id,
-      {
-        $set: { image },
-      },
-      {
-        runValidators: true,
-        new: true,
-      }
-    );
-    res.status(201).json({ data: `Photo added to Post with ID ${id}` });
-  } catch (error) {
-    console.log(error);
-    next(error);
+postRouter.post(
+  "/:id/upload",
+  postsParser.single("image"),
+  async (req, res, next) => {
+    const { id } = req.params;
+    console.log(id);
+    try {
+      console.log("req.file", req.file);
+      const image = req.file && req.file.path;
+      const updatePosts = await Posts.findByIdAndUpdate(
+        id,
+        {
+          $set: { image },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      res.status(201).json({ data: `Photo added to Post with ID ${id}` });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
-});
+);
 
 module.exports = postRouter;
