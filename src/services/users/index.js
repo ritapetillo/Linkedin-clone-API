@@ -14,7 +14,6 @@ const auth = require("../../lib/utils/privateRoutes");
 const validation = require("../../lib/validation/validationMiddleware");
 const valSchema = require("../../lib/validation/validationSchema");
 
-
 userRoutes.use("/experiences", expRoutes);
 userRoutes.use("/education", edRoutes);
 userRoutes.use("/skills", skillRoutes);
@@ -37,7 +36,11 @@ userRoutes.get("/", async (req, res, next) => {
 userRoutes.get("/me", auth, async (req, res, next) => {
   try {
     const user = req.user;
-    const currentUser = await User.findById(user.id).select("-password");
+    const currentUser = await User.findById(user.id)
+      .select("-password")
+      .populate("experiences")
+      .populate("skills")
+      .populate("education");
     res.status(200).send({ currentUser });
   } catch (err) {
     const error = new Error("You are not authorized to see this user");
@@ -81,7 +84,7 @@ userRoutes.post(
       error.code = "400";
       next(error);
     }
-p
+    p;
   }
 );
 
@@ -152,7 +155,7 @@ userRoutes.put("/", auth, async (req, res, next) => {
 //DELETE /api/users
 //DELETE a user
 userRoutes.delete("/", auth, async (req, res, next) => {
-  const  userId  = req.user.id;
+  const userId = req.user.id;
 
   try {
     const user = await User.findByIdAndDelete(userId);
@@ -167,7 +170,7 @@ userRoutes.delete("/", auth, async (req, res, next) => {
 userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const  userId  = req.user.id;
+    const userId = req.user.id;
     if (!(await User.findById(followId)))
       return next(
         new Error("The user you are trying to follow, does not exist")
@@ -199,7 +202,7 @@ userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
 userRoutes.put("/unfollow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const  userId  = req.user.id;
+    const userId = req.user.id;
 
     const following = await User.findByIdAndUpdate(
       userId,
@@ -226,13 +229,12 @@ userRoutes.put("/unfollow/:followId", auth, async (req, res, next) => {
 //GET ALL USERS
 userRoutes.get("/:username", async (req, res, next) => {
   try {
-    const {username} = req.params
-    const user = await User.findOne({username}).select("-password");
+    const { username } = req.params;
+    const user = await User.findOne({ username }).select("-password");
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There is no user with this id");
   }
 });
-
 
 module.exports = userRoutes;
