@@ -40,7 +40,7 @@ postRouter.post(
       const newPost = new Posts(req.body);
       newPost.userId = user.id;
       const { _id } = await newPost.save();
-      res.status(201).json({ data: `Post with ${_id} added` });
+      res.status(201).json({ _id });
     } catch (error) {
       console.log(error);
       next(error);

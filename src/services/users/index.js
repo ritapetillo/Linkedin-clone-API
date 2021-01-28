@@ -228,8 +228,11 @@ userRoutes.put("/unfollow/:followId", auth, async (req, res, next) => {
 userRoutes.get("/:username", async (req, res, next) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username }).select("-password")
-    .populate("experiences skills education");
+
+    const user = await User.findOne({ username })
+      .select("-password")
+      .populate("experiences skills education");
+
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There is no user with this id");
