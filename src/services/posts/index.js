@@ -100,25 +100,20 @@ postRouter.put(
 );
 /* - DELETE https://yourapi.herokuapp.com/api/posts/{postId}
 Removes a post */
-postRouter.delete(
-  "/:postId",
-  auth,
-  validationMiddleware(schemas.PostSchema),
-  async (req, res, next) => {
-    const { postId } = req.params;
-    const user = req.user;
-    const postToDelete = await Posts.findById(postId);
-    try {
-      if (postToDelete.userId != user.id)
-        throw new ApiError(403, `Only the owner of this comment can edit`);
-      const removedPost = await Posts.findByIdAndDelete(postId);
-      res.status(200).send("Deleted Post with Id: " + postId);
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
+postRouter.delete("/:postId", auth, async (req, res, next) => {
+  const { postId } = req.params;
+  const user = req.user;
+  const postToDelete = await Posts.findById(postId);
+  try {
+    if (postToDelete.userId != user.id)
+      throw new ApiError(403, `Only the owner of this comment can edit`);
+    const removedPost = await Posts.findByIdAndDelete(postId);
+    res.status(200).send("Deleted Post with Id: " + postId);
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
-);
+});
 /* - POST https://yourapi.herokuapp.com/api/posts/{postId}
 Add an image to the post under the name of "post" */
 postRouter.post(
