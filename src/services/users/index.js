@@ -38,9 +38,7 @@ userRoutes.get("/me", auth, async (req, res, next) => {
     const user = req.user;
     const currentUser = await User.findById(user.id)
       .select("-password")
-      .populate("experiences")
-      .populate("skills")
-      .populate("education");
+      .populate("experiences skills education");
     res.status(200).send({ currentUser });
   } catch (err) {
     const error = new Error("You are not authorized to see this user");
@@ -231,9 +229,7 @@ userRoutes.get("/:username", async (req, res, next) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username }).select("-password")
-    .populate("experiences")
-    .populate("skills")
-    .populate("education");;
+    .populate("experiences skills education");
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There is no user with this id");
