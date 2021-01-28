@@ -60,7 +60,7 @@ experiencesRouter.post(
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { experiences: _id },
       });
-      res.status(201).json({ newExperiences });
+      res.status(201).json({ data:newExperiences });
     } catch (error) {
       console.log(error);
       next(error);
@@ -90,7 +90,7 @@ experiencesRouter.post(
       );
       res
         .status(201)
-        .json({ updateExperience });
+        .json({ data:updateExperience });
     } catch (error) {
       console.log(error);
       next(error);

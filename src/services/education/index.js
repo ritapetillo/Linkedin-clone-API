@@ -59,7 +59,7 @@ educationRouter.post(
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { education: _id },
       });
-      res.status(201).json({ newEducation });
+      res.status(201).json({ data:newEducation });
     } catch (error) {
       console.log(error);
       next(error);
@@ -118,7 +118,7 @@ educationRouter.put(
           new: true,
         }
       );
-      res.status(201).json({ educationToEdit });
+      res.status(201).json({ data:educationToEdit });
     } catch (error) {
       console.log(error);
       next(error);
