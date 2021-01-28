@@ -25,7 +25,7 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
     if (!response) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
-      res.status(200).json({ data: response });
+      res.status(200).json({ response });
     }
   } catch (error) {
     console.log(error);
@@ -60,7 +60,7 @@ experiencesRouter.post(
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { experiences: _id },
       });
-      res.status(201).json({ data: `Experience with ${_id} added` });
+      res.status(201).json({ newExperiences });
     } catch (error) {
       console.log(error);
       next(error);
@@ -90,7 +90,7 @@ experiencesRouter.post(
       );
       res
         .status(201)
-        .json({ data: `Photo added to Experience with ID ${experienceId}` });
+        .json({ updateExperience });
     } catch (error) {
       console.log(error);
       next(error);
@@ -123,7 +123,7 @@ experiencesRouter.put(
       );
       res
         .status(201)
-        .json({ updatedExpereince });
+        .json({ updatedExpereince});
     } catch (error) {
       console.log(error);
       next(error);
@@ -146,7 +146,7 @@ experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
       });
       res
         .status(201)
-        .json({ data: `Experience with ID ${experienceId} deleted` });
+        .json({ experienceToDelete });
     } else {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     }
