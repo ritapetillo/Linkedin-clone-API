@@ -25,7 +25,7 @@ educationRouter.get("/:educationId", async (req, res, next) => {
     if (!response) {
       throw new ApiError(404, `No education with ID ${educationId} found`);
     } else {
-      res.status(200).json({ data: response });
+      res.status(200).json({ response });
     }
   } catch (error) {
     console.log(error);
@@ -59,7 +59,7 @@ educationRouter.post(
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { education: _id },
       });
-      res.status(201).json({ data: `Education with ID ${_id} added` });
+      res.status(201).json({ newEducation });
     } catch (error) {
       console.log(error);
       next(error);
@@ -91,7 +91,7 @@ educationRouter.post(
       );
       res
         .status(201)
-        .json({ data: `Photo added to Education with ID ${educationId}` });
+        .json({ updateEducation });
     } catch (error) {
       console.log(error);
       next(error);
@@ -118,7 +118,7 @@ educationRouter.put(
           new: true,
         }
       );
-      res.status(201).json({ data: `Education with ID ${educationId} edited` });
+      res.status(201).json({ educationToEdit });
     } catch (error) {
       console.log(error);
       next(error);
@@ -141,7 +141,7 @@ educationRouter.delete("/:educationId", auth, async (req, res, next) => {
       });
       res
         .status(201)
-        .json({ data: `Education with ID ${educationId} deleted` });
+        .json({ educationToDelete });
     } else {
       throw new ApiError(404, `No education with ID ${educationId} found`);
     }
