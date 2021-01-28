@@ -16,7 +16,7 @@ const schemas = {
   }),
   commentSchema: Joi.object().keys({
     text: Joi.string().required(),
-    user: Joi.string().required(),
+    userId: Joi.string(),
   }),
   experienceSchema: Joi.object().keys({
     role: Joi.string().required(),
@@ -40,7 +40,7 @@ const schemas = {
   }),
   PostSchema: Joi.object().keys({
 text: Joi.string().required(),
-    img:Joi.string(),
+    image:Joi.string(),
     comments:Joi.string(),
     userId: Joi.string(),
 

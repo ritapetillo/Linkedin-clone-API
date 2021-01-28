@@ -37,11 +37,12 @@ experiencesRouter.get("/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",
-      "Content-Disposition": "attachment; filename=expereinces.csv",
+      "Content-Disposition": "attachment; filename=experience.csv",
     });
-    const experiences = await ExperienceModel.find().csv(res);
-  } catch (error) {
-    console.log(error);
+    const users = await User.find().select("-password").csv(res);
+  } catch (err) {
+    const error = new Error("There are no users");
+    error.code = "400";
     next(error);
   }
 });
@@ -68,7 +69,7 @@ const newExperiences = new ExperienceModel(req.body);
 );
 
 experiencesRouter.post(
-  "/:experienceId/picture",
+  "/:experienceId/upload",
   auth,
   expParser.single("image"),
   async (req, res, next) => {
@@ -124,9 +125,9 @@ experiencesRouter.put(
 experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
   const { experienceId } = req.params;
   const user = req.user;
-  const experienceToDelete = await ExperienceModel.findById(id);
+  const experienceToDelete = await ExperienceModel.findById(experienceId);
 try {
-  if (experienceToDelete.userId !== user.id)
+  if (experienceToDelete.userId != user.id)
   throw new ApiError(403, `Only the owner of this profile can edit`);
  const experience = await ExperienceModel.findByIdAndDelete(experienceId);
     const { userId } = experience;

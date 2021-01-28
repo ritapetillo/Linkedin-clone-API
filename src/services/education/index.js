@@ -70,7 +70,7 @@ educationRouter.post(
 );
 
 educationRouter.post(
-  "/:educationId/picture",
+  "/:educationId/upload",
   auth,
   edParser.single("image"),
   async (req, res, next) => {
@@ -124,15 +124,15 @@ educationRouter.put(
 educationRouter.delete("/:educationId", auth, async (req, res, next) => {
   const { educationId } = req.params;
   const user = req.user;
-  const educationToDelete = await EducationModel.findById(id);
+  const educationToDelete = await EducationModel.findById(educationId);
  try {
-    if (educationToDelete.userId !== user.id)
+    if (educationToDelete.userId != user.id)
     throw new ApiError(403, `Only the owner of this profile can edit`);
    const education = await EducationModel.findByIdAndDelete(educationId);
       const { userId } = education;
       if (education) {
         const userModified = await UserModel.findByIdAndUpdate(
-          { userId },
+          userId,
           { $pull: { education: educationId } }
         );
         res

@@ -63,7 +63,7 @@ skillsRouter.put(
   async (req, res, next) => {
     const { skillId } = req.params;
     const user = req.user;
-    const skillToEdit = await Posts.findById(id);
+    const skillToEdit = await Posts.findById(skillId);
 
     try {
       if (skillToEdit.id != user.id)
