@@ -23,7 +23,6 @@ server.use("/api", apiRoutes);
 
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
-console.log(listEndpoints(server))
 
 //Connect to DB and server
 mongoose
