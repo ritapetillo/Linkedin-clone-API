@@ -6,15 +6,14 @@ const CommentModel = new Schema({
         type: String,
         required: true,
     },
-    img: {
+    image: {
         type: String,
         required: false
     },
-    user: [{ 
-        type: Schema.Types.ObjectId, 
-        ref: "User",
-        required: true
-    }],
+    userId: {
+        type: String,
+        required: true,
+      },
     replies: {
         type: [
             {
@@ -26,11 +25,11 @@ const CommentModel = new Schema({
                     type: String,
                     required: false
                 },
-                user: [{
+                userId: {
                     type: Schema.Types.ObjectId,
                     ref: "users",
                     required: true
-                }],
+                },
             },
             { timestamps: true }
         ],
