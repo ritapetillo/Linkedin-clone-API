@@ -291,6 +291,7 @@ router.put(
       }
     } catch (error) {
       console.log(error);
+      next(error)
     }
   }
 );
@@ -332,6 +333,7 @@ router.delete("/:cid/replies/:rid", auth, async (req, res, next) => {
       next(err);
     }
   } catch (error) {
+    console.log(error);
     next(error);
   }
 });
@@ -352,7 +354,7 @@ router.post(
         },
       });
 
-      console.log("reply user id:::::::::::", replies[0].user[0]);
+      console.log("reply user id:::::::::::", replies);
 
       try {
         const img = req.file && req.file.path;
@@ -371,6 +373,7 @@ router.post(
       res.status(200).send("reply modified successfully!");
     } catch (error) {
       console.log(error);
+      next(error);
     }
   }
 );
