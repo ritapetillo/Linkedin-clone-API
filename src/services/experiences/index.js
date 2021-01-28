@@ -103,6 +103,9 @@ experiencesRouter.put(
   auth,
   validationMiddleware(schemas.experienceSchema),
   async (req, res, next) => {
+    console.log("req.body", req.body)
+    console.log("req.params", req.params)
+
     const { experienceId } = req.params;
     const user = req.user;
     const experienceToEdit = await ExperienceModel.findById(experienceId);
@@ -120,7 +123,7 @@ experiencesRouter.put(
       );
       res
         .status(201)
-        .json({ data: `Experience with ID ${experienceId} edited` });
+        .json({ updatedExpereince });
     } catch (error) {
       console.log(error);
       next(error);
