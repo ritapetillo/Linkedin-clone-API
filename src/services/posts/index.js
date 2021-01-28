@@ -37,7 +37,6 @@ postRouter.post(
   validationMiddleware(schemas.PostSchema),
   async (req, res, next) => {
     const user = req.user;
-    console.log("USER", user);
     try {
       const newPost = new Posts(req.body);
       newPost.userId = user.id;
@@ -76,7 +75,7 @@ Edit a given post */
 postRouter.put(
   "/:id",
   auth,
-  // validationMiddleware(schemas.PostSchema),
+  validationMiddleware(schemas.PostSchema),
   async (req, res, next) => {
     const { id } = req.params;
     const user = req.user;
@@ -101,15 +100,17 @@ postRouter.put(
 );
 /* - DELETE https://yourapi.herokuapp.com/api/posts/{postId}
 Removes a post */
-postRouter.delete("/:id", async (req, res, next) => {
-  const { id } = req.params;
+postRouter.delete("/:postId", auth,
+validationMiddleware(schemas.PostSchema), async (req, res, next) => {
+  const { postId } = req.params;
   const user = req.user;
-  const postToDelete = await Posts.findById(id);
+  const postToDelete = await Posts.findById(postId);
   try {
-    if (postToDelete.id !== user.id)
+    
+    if (postToDelete.userId != user.id)
     throw new ApiError(403, `Only the owner of this comment can edit`);
-    const removedPost = await Posts.findByIdAndDelete(id);
-    res.status(200).send("Deleted Post with Id: " + id);
+    const removedPost = await Posts.findByIdAndDelete(postId);
+    res.status(200).send("Deleted Post with Id: " + postId);
   } catch (error) {
     console.log(error);
     next(error);
