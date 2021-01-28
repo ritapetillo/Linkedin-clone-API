@@ -123,9 +123,9 @@ postRouter.post("/:id", postsParser.single("image"), async (req, res, next) => {
   console.log(id);
   try {
     console.log("req.file", req.file);
-    const img = req.file && req.file.path;
+    const image = req.file && req.file.path;
     const updatePosts = await Posts.findByIdAndUpdate(id, {
-      $push: { img },
+      $push: { image },
     });
     res.status(201).json({ data: `Photo added to Post with ID ${id}` });
   } catch (error) {
