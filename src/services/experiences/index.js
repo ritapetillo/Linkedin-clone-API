@@ -6,6 +6,7 @@ const schemas = require("../../lib/validation/validationSchema");
 const validationMiddleware = require("../../lib/validation/validationMiddleware");
 const expParser = require("../../lib/utils/cloudinary/experiences");
 const UserModel = require("../../models/User");
+const auth = require("../../lib/utils/privateRoutes");
 
 experiencesRouter.get("/", async (req, res, next) => {
   try {
@@ -21,10 +22,10 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   const { experienceId } = req.params;
   try {
     const response = await ExperienceModel.findById(experienceId);
-    if (response == null) {
+    if (!response) {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     } else {
-      res.status(200).json({ data: response });
+      res.status(200).json({ response });
     }
   } catch (error) {
     console.log(error);
@@ -32,39 +33,34 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   }
 });
 
-
 experiencesRouter.get("/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",
-      "Content-Disposition": "attachment; filename=expereinces.csv",
+      "Content-Disposition": "attachment; filename=experience.csv",
     });
-    const experiences = await ExperienceModel.find().csv(res);
-  } catch (error) {
-    console.log(error);
+    const users = await User.find().select("-password").csv(res);
+  } catch (err) {
+    const error = new Error("There are no users");
+    error.code = "400";
     next(error);
   }
 });
 
 experiencesRouter.post(
-  "/:userId",
+  "/",
+  auth,
   validationMiddleware(schemas.experienceSchema),
   async (req, res, next) => {
+    const user = req.user;
     try {
       const newExperiences = new ExperienceModel(req.body);
+      newExperiences.userId = user.id;
       const { _id } = await newExperiences.save();
-      const { userId } = req.params;
-      const response = await UserModel.findById(userId);
-      if (response) {
-        const user = await UserModel.findByIdAndUpdate(userId, {
-          $push: { experiences: _id },
-        });
-      } else {
-        throw new ApiError(404, `No User ID ${userId} found`);
-      }
-      res
-        .status(201)
-        .json({ data: `Experience with ${_id} added to user ${userId}` });
+      const userModified = await UserModel.findByIdAndUpdate(user.id, {
+        $push: { experiences: _id },
+      });
+      res.status(201).json({ data:newExperiences });
     } catch (error) {
       console.log(error);
       next(error);
@@ -73,19 +69,28 @@ experiencesRouter.post(
 );
 
 experiencesRouter.post(
-  "/:experienceId/picture",
+  "/:experienceId/upload",
+  auth,
   expParser.single("image"),
   async (req, res, next) => {
     const { experienceId } = req.params;
+    const user = req.user;
     try {
+      const currentUser = await UserModel.findById(user.id);
+      if (!currentUser)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
       const image = req.file && req.file.path;
       const updateExperience = await ExperienceModel.findByIdAndUpdate(
         experienceId,
-        { $push: { image } }
+        { $set: { image } },
+        {
+          runValidators: true,
+          new: true,
+        }
       );
       res
         .status(201)
-        .json({ data: `Photo added to Experience with ID ${experienceId}` });
+        .json({ data:updateExperience });
     } catch (error) {
       console.log(error);
       next(error);
@@ -95,21 +100,30 @@ experiencesRouter.post(
 
 experiencesRouter.put(
   "/:experienceId",
+  auth,
   validationMiddleware(schemas.experienceSchema),
   async (req, res, next) => {
+    console.log("req.body", req.body)
+    console.log("req.params", req.params)
+
     const { experienceId } = req.params;
+    const user = req.user;
+    const experienceToEdit = await ExperienceModel.findById(experienceId);
+
     try {
-      const experience = await ExperienceModel.findByIdAndUpdate(
+      if (experienceToEdit.userId != user.id)
+        throw new ApiError(403, `Only the owner of this profile can edit`);
+      const updatedExperience = await ExperienceModel.findByIdAndUpdate(
         experienceId,
-        req.body
+        req.body,
+        {
+          runValidators: true,
+          new: true,
+        }
       );
-      if (experience) {
-        res
-          .status(201)
-          .json({ data: `Experience with ID ${experienceId} updated` });
-      } else {
-        throw new ApiError(404, `No experience with ID ${experienceId} found`);
-      }
+      res
+        .status(201)
+        .json({ updatedExperience});
     } catch (error) {
       console.log(error);
       next(error);
@@ -117,20 +131,22 @@ experiencesRouter.put(
   }
 );
 
-experiencesRouter.delete("/:experienceId", async (req, res, next) => {
+experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
   const { experienceId } = req.params;
+  const user = req.user;
+  const experienceToDelete = await ExperienceModel.findById(experienceId);
   try {
+    if (experienceToDelete.userId != user.id)
+      throw new ApiError(403, `Only the owner of this profile can edit`);
     const experience = await ExperienceModel.findByIdAndDelete(experienceId);
-    const { username } = experience;
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      { $pull: { experiences: experienceId } }
-    );
-
+    const { userId } = experience;
     if (experience) {
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
+        $pull: { experiences: experienceId },
+      });
       res
         .status(201)
-        .json({ data: `Experience with ID ${experienceId} deleted` });
+        .json({ experienceToDelete });
     } else {
       throw new ApiError(404, `No experience with ID ${experienceId} found`);
     }
