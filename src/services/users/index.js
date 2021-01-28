@@ -38,8 +38,8 @@ userRoutes.get("/me", auth, async (req, res, next) => {
     const user = req.user;
     const currentUser = await User.findById(user.id)
       .select("-password")
-      .populate("experiences skills education");
-    res.status(200).send({ currentUser });
+      .populate({ path: "experiences skills education following followers"});
+      res.status(200).send({ currentUser });
   } catch (err) {
     const error = new Error("You are not authorized to see this user");
     error.code = "400";
@@ -231,7 +231,7 @@ userRoutes.get("/:username", async (req, res, next) => {
 
     const user = await User.findOne({ username })
       .select("-password")
-      .populate("experiences skills education");
+        .populate({ path: "experiences skills education following followers"});
 
     res.status(200).send({ user });
   } catch (err) {
