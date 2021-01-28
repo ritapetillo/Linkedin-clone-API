@@ -15,6 +15,7 @@ postRouter.get("/", async (req, res, next) => {
     const query = q2m(req.query);
     const total = await Posts.countDocuments(query.criteria);
     const post = await Posts.find(query.criteria, query.options.fields)
+      .sort([["createdAt", -1]])
       .sort(query.options.sort)
       .skip(query.options.skip)
       .limit(query.options.limit)
