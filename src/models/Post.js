@@ -11,7 +11,7 @@ const PostSchema = new Schema(
     image: {
       type: String,
     },
-    userId: [{ type: Schema.Types.ObjectId, ref: "users" }],
+    userId: { type: Schema.Types.ObjectId, ref: "users" },
     img: {
       type: String,
       required: false,

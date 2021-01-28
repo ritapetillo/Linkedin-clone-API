@@ -222,9 +222,10 @@ userRoutes.put("/unfollow/:followId", auth, async (req, res, next) => {
 
 //GET //api/users
 //GET ALL USERS
-userRoutes.get("/:id", async (req, res, next) => {
+userRoutes.get("/:username", async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const {username} = req.params
+    const user = await User.findOne({username}).select("-password");
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There is no user with this id");
