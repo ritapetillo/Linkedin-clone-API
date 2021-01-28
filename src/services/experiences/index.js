@@ -113,7 +113,7 @@ experiencesRouter.put(
     try {
       if (experienceToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const updatedExpereince = await ExperienceModel.findByIdAndUpdate(
+      const updatedExperience = await ExperienceModel.findByIdAndUpdate(
         experienceId,
         req.body,
         {
@@ -123,7 +123,7 @@ experiencesRouter.put(
       );
       res
         .status(201)
-        .json({ updatedExpereince});
+        .json({ updatedExperience});
     } catch (error) {
       console.log(error);
       next(error);
