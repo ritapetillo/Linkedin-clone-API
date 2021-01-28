@@ -7,11 +7,11 @@ const PostSchema = new Schema(
       type: String,
       required: true,
     },
-    
+
     image: {
       type: String,
-      required: false,
     },
+
     userId: { type: Schema.Types.ObjectId, ref: "users" },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
