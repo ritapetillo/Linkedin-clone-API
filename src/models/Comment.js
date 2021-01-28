@@ -14,6 +14,10 @@ const CommentModel = new Schema({
         type: String,
         required: true,
       },
+    postId: {
+        type: String,
+        reqiured: true
+    },
     replies: {
         type: [
             {

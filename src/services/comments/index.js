@@ -29,14 +29,14 @@ router.post(
   }
 );
 
-// /comments/
+// /comments/:pid
 // retrieve all comments
-router.get("/", async (req, res, next) => {
+router.get("/:postId", async (req, res, next) => {
   try {
     const query = q2m(req.query);
     const total = await CommentsModel.countDocuments(query.criteria);
     const comment = await CommentsModel.find(
-      query.criteria,
+      query.criteria && {postId: req.params.postId},
       query.options.fields
     )
       .sort(query.options.sort)
