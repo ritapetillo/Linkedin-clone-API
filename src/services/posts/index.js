@@ -76,21 +76,20 @@ postRouter.put(
   auth,
   validationMiddleware(schemas.PostSchema),
   async (req, res, next) => {
-    const { id } = req.params;
-    const user = req.user;
-    const postToEdit = await Posts.findById(id);
-
     try {
+      const { id } = req.params;
+      console.log(id);
+      const user = req.user;
+      const postToEdit = await Posts.findById(id);
       console.log("postToEdit.userId", postToEdit.userId);
       console.log("user.id", user.id);
-
       if (postToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this comment can edit`);
       const updatedPost = await Posts.findByIdAndUpdate(id, req.body, {
         runValidators: true,
         new: true,
       });
-      const { id } = updatedPost;
+      const { _id } = updatedPost;
       res.status(200).send({ updatedPost, _id });
     } catch (error) {
       console.log(error);

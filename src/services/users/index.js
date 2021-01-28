@@ -22,7 +22,7 @@ userRoutes.use("/skills", skillRoutes);
 //GET ALL USERS
 userRoutes.get("/", async (req, res, next) => {
   try {
-    const users = await User.find();
+    const users = await User.find().populate({ path: "following followers" });
     res.status(200).send({ users });
   } catch (err) {
     const error = new Error("There are no users");
