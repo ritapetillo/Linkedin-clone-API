@@ -1,5 +1,5 @@
 const express = require("express");
-const EducationModel = require("../../models/Education");
+const EducationModel = require("../../models/education");
 const ApiError = require("../../classes/apiError");
 const educationRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");

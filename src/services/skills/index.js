@@ -1,5 +1,5 @@
 const express = require("express");
-const SkillModel = require("../../models/Skills");
+const SkillModel = require("../../models/skills");
 const ApiError = require("../../classes/apiError");
 const skillsRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");

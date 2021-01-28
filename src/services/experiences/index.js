@@ -1,5 +1,5 @@
 const express = require("express");
-const ExperienceModel = require("../../models/Experiences");
+const ExperienceModel = require("../../models/experiences");
 const ApiError = require("../../classes/apiError");
 const experiencesRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
