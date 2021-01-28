@@ -36,7 +36,7 @@ router.get("/:postId", async (req, res, next) => {
     const query = q2m(req.query);
     const total = await CommentsModel.countDocuments(query.criteria);
     const comment = await CommentsModel.find(
-      query.criteria && {postId: req.params.postId},
+      query.criteria && { postId: req.params.postId },
       query.options.fields
     )
       .sort(query.options.sort)
@@ -178,9 +178,16 @@ router.post(
     const { id } = req.params;
     try {
       const image = req.file && req.file.path;
-      const updateComment = await CommentsModel.findByIdAndUpdate(id, {
-        $set: { image },
-      });
+      const updateComment = await CommentsModel.findByIdAndUpdate(
+        id,
+        {
+          $set: { image },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
       res.status(201).json({ data: `Photo added to comment with ID ${id}` });
     } catch (error) {
       console.log(error);
@@ -291,7 +298,7 @@ router.put(
       }
     } catch (error) {
       console.log(error);
-      next(error)
+      next(error);
     }
   }
 );

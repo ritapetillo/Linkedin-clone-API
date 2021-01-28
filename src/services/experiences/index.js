@@ -54,7 +54,7 @@ experiencesRouter.post(
   async (req, res, next) => {
     const user = req.user;
     try {
-const newExperiences = new ExperienceModel(req.body);
+      const newExperiences = new ExperienceModel(req.body);
       newExperiences.userId = user.id;
       const { _id } = await newExperiences.save();
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
@@ -82,7 +82,11 @@ experiencesRouter.post(
       const image = req.file && req.file.path;
       const updateExperience = await ExperienceModel.findByIdAndUpdate(
         experienceId,
-        { $push: { image } }
+        { $set: { image } },
+        {
+          runValidators: true,
+          new: true,
+        }
       );
       res
         .status(201)
@@ -108,34 +112,35 @@ experiencesRouter.put(
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const updatedExpereince = await ExperienceModel.findByIdAndUpdate(
         experienceId,
-        req.body, {
+        req.body,
+        {
           runValidators: true,
           new: true,
-        });
-        res
+        }
+      );
+      res
         .status(201)
         .json({ data: `Experience with ID ${experienceId} edited` });
-      } catch (error) {
-        console.log(error);
-        next(error);
-      }
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
-  );
+  }
+);
 
 experiencesRouter.delete("/:experienceId", auth, async (req, res, next) => {
   const { experienceId } = req.params;
   const user = req.user;
   const experienceToDelete = await ExperienceModel.findById(experienceId);
-try {
-  if (experienceToDelete.userId != user.id)
-  throw new ApiError(403, `Only the owner of this profile can edit`);
- const experience = await ExperienceModel.findByIdAndDelete(experienceId);
+  try {
+    if (experienceToDelete.userId != user.id)
+      throw new ApiError(403, `Only the owner of this profile can edit`);
+    const experience = await ExperienceModel.findByIdAndDelete(experienceId);
     const { userId } = experience;
     if (experience) {
-      const userModified = await UserModel.findByIdAndUpdate(
-        userId,
-        { $pull: { experiences: experienceId } }
-      );
+      const userModified = await UserModel.findByIdAndUpdate(userId, {
+        $pull: { experiences: experienceId },
+      });
       res
         .status(201)
         .json({ data: `Experience with ID ${experienceId} deleted` });

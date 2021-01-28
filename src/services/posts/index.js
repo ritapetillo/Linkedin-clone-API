@@ -28,7 +28,6 @@ postRouter.get("/", async (req, res, next) => {
   }
 });
 
-
 /* - POST https://yourapi.herokuapp.com/api/posts/
 Creates a new post */
 postRouter.post(
@@ -80,10 +79,10 @@ postRouter.put(
     const { id } = req.params;
     const user = req.user;
     const postToEdit = await Posts.findById(id);
-    
+
     try {
-      console.log("postToEdit.userId", postToEdit.userId)
-      console.log("user.id", user.id)
+      console.log("postToEdit.userId", postToEdit.userId);
+      console.log("user.id", user.id);
 
       if (postToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this comment can edit`);
@@ -100,22 +99,25 @@ postRouter.put(
 );
 /* - DELETE https://yourapi.herokuapp.com/api/posts/{postId}
 Removes a post */
-postRouter.delete("/:postId", auth,
-validationMiddleware(schemas.PostSchema), async (req, res, next) => {
-  const { postId } = req.params;
-  const user = req.user;
-  const postToDelete = await Posts.findById(postId);
-  try {
-    
-    if (postToDelete.userId != user.id)
-    throw new ApiError(403, `Only the owner of this comment can edit`);
-    const removedPost = await Posts.findByIdAndDelete(postId);
-    res.status(200).send("Deleted Post with Id: " + postId);
-  } catch (error) {
-    console.log(error);
-    next(error);
+postRouter.delete(
+  "/:postId",
+  auth,
+  validationMiddleware(schemas.PostSchema),
+  async (req, res, next) => {
+    const { postId } = req.params;
+    const user = req.user;
+    const postToDelete = await Posts.findById(postId);
+    try {
+      if (postToDelete.userId != user.id)
+        throw new ApiError(403, `Only the owner of this comment can edit`);
+      const removedPost = await Posts.findByIdAndDelete(postId);
+      res.status(200).send("Deleted Post with Id: " + postId);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
-});
+);
 /* - POST https://yourapi.herokuapp.com/api/posts/{postId}
 Add an image to the post under the name of "post" */
 postRouter.post("/:id", postsParser.single("image"), async (req, res, next) => {
@@ -124,9 +126,16 @@ postRouter.post("/:id", postsParser.single("image"), async (req, res, next) => {
   try {
     console.log("req.file", req.file);
     const image = req.file && req.file.path;
-    const updatePosts = await Posts.findByIdAndUpdate(id, {
-      $push: { image },
-    });
+    const updatePosts = await Posts.findByIdAndUpdate(
+      id,
+      {
+        $set: { image },
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
     res.status(201).json({ data: `Photo added to Post with ID ${id}` });
   } catch (error) {
     console.log(error);

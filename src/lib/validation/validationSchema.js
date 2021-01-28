@@ -37,6 +37,7 @@ const schemas = {
     endYear: Joi.number().required(),
     activtiesSocieties: Joi.string(),
     description: Joi.string().required(),
+    image: Joi.string(),
     userId: Joi.string(),
   }),
   PostSchema: Joi.object().keys({
