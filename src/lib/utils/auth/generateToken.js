@@ -24,12 +24,12 @@ const generateToekn = async (user, res) => {
   res.cookie("token", accessToken, {
     // expires: new Date(Date.now() + expiration),
     secure: false, // set to true if your using https
-    sameSite: "none",
+
     httpOnly: true,
   });
   res.cookie("refreshToken", refreshToken, {
     secure: false, // set to true if your using https
-    sameSite: "none",
+
     httpOnly: true,
   });
   return { accessToken, refreshToken };
