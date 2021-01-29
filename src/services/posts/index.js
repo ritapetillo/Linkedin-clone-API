@@ -144,4 +144,37 @@ postRouter.post(
   }
 );
 
+//postRoutes.post('/like/:username')
+
+postRouter.post("/like/:id", auth, async (req, res, next) => {
+  try {
+    const likes = await Posts.findByIdAndUpdate(req.params.id, {
+      $addToSet: { likes: req.user.username }},
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+
+postRouter.put("/unlike/:id", auth, async (req, res, next) => {
+  try {
+    const unlike = await Posts.findByIdAndUpdate(req.params.id, {
+      $pull: { likes: req.user.username }},
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 module.exports = postRouter;

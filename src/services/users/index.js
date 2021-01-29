@@ -187,11 +187,7 @@ userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
     const userId = req.user.id;
-    if (!(await User.findById(followId)))
-      return next(
-        new Error("The user you are trying to follow, does not exist")
-      );
-
+    
     const user = await User.findByIdAndUpdate(
       userId,
       {
