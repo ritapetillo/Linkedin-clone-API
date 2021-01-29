@@ -67,7 +67,7 @@ userRoutes.get("/me", auth, async (req, res, next) => {
 
 //GET //api/users/csv
 //GET ALL USERS in a cvs file
-userRoutes.get("/csv", async (req, res, next) => {
+userRoutes.get("/download/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",

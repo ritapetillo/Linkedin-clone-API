@@ -33,7 +33,7 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   }
 });
 
-experiencesRouter.get("/csv", async (req, res, next) => {
+experiencesRouter.get("/download/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",

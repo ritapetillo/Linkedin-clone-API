@@ -33,7 +33,7 @@ educationRouter.get("/:educationId", async (req, res, next) => {
   }
 });
 
-educationRouter.get("/csv", async (req, res, next) => {
+educationRouter.get("/download/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",
