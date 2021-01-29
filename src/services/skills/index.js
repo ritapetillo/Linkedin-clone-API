@@ -42,13 +42,13 @@ skillsRouter.post(
       const currentUser = await UserModel.findById(user.id);
       if (!currentUser)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const newSkill = new SkillModel(req.body);
-      newSkill.userId = user.id
-      const { _id } = await newSkill.save();
+      const data = new SkillModel(req.body);
+      data.userId = user.id
+      const { _id } = await data.save();
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { skills: _id },
       });
-      res.status(201).json({ newSkill });
+      res.status(201).json({ data });
     } catch (error) {
       console.log(error);
       next(error);
@@ -68,7 +68,7 @@ skillsRouter.put(
     try {
       if (skillToEdit.id != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const updatedExpereince = await SkillModel.findByIdAndUpdate(
+      const data = await SkillModel.findByIdAndUpdate(
         skillId,
         req.body, {
           runValidators: true,
@@ -76,7 +76,7 @@ skillsRouter.put(
         });
         res
         .status(201)
-        .json({ skillToEdit });
+        .json({ data });
       } catch (error) {
         console.log(error);
         next(error);
@@ -91,8 +91,8 @@ skillsRouter.delete("/:skillId", auth, async (req, res, next) => {
   try {
     if (skillToDelete.userId != user.id)
     throw new ApiError(403, `Only the owner of this profile can edit`);
-  const experience = await ExperienceModel.findByIdAndDelete(experienceId);
-  const { userId } = experience;
+  const skill = await SkillModel.findByIdAndDelete(skillId);
+  const { userId } = skill;
     if (skill) {
       const userModified = await UserModel.findByIdAndUpdate(
         userId,
