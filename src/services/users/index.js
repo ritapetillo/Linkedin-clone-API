@@ -14,6 +14,9 @@ const fs = require("fs-extra")
 const path = require("path")
 const moment= require("moment")
 const hbs = require("hbs")
+const homeDir = require('os').homedir();
+const desktopDir = `${homeDir}/Desktop`;
+console.log(desktopDir);
 
 
 const auth = require("../../lib/utils/privateRoutes");
@@ -284,14 +287,15 @@ userRoutes.get("/user/:id/cv", async (req, res, next) => {
       await page.setContent(content)
       await page.emulateMediaFeatures("screen")
       await page.pdf({
-        path: path.join(process.cwd(), `${user.username}_CV.pdf`),
+        path: path.join(desktopDir, `${user.username}_CV.pdf`),
         format:"A4",
+        displayHeaderFooter: true,
         printBackground: true
       })
       await browser.close()
       process.exit
     if (user) {
-      res.send("PDF created at "+ process.cwd() + `\\${user.username}_CV.pdf`);
+      res.send("PDF created at "+ desktopDir + `\\${user.username}_CV.pdf`);
     } else {
       next(error);
       console.log('something here')
