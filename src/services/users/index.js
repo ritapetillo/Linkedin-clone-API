@@ -76,7 +76,7 @@ userRoutes.get("/me", auth, async (req, res, next) => {
 
 //GET //api/users/csv
 //GET ALL USERS in a cvs file
-userRoutes.get("/csv", async (req, res, next) => {
+userRoutes.get("/download/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",
@@ -196,11 +196,7 @@ userRoutes.post("/follow/:followId", auth, async (req, res, next) => {
   try {
     const { followId } = req.params;
     const userId = req.user.id;
-    if (!(await User.findById(followId)))
-      return next(
-        new Error("The user you are trying to follow, does not exist")
-      );
-
+    
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -296,9 +292,14 @@ userRoutes.get("/user/:id/cv", async (req, res, next) => {
       process.exit
     if (user) {
       res.send("PDF created at "+ desktopDir + `\\${user.username}_CV.pdf`);
+
+      // res.writeHead(200, {
+      //   "Content-Type": "application/pdf",
+      // "Content-Disposition": `attachment; filename=${user.username}_CV.pdf`,
+      // });
     } else {
       next(error);
-      console.log('something here')
+      console.log(error)
     }
   } catch (error) {
     console.log(error);

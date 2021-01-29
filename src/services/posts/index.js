@@ -7,6 +7,7 @@ const postsParser = require("../../lib/utils/cloudinary/posts");
 const q2m = require("query-to-mongo");
 const ApiError = require("../../classes/apiError");
 const auth = require("../../lib/utils/privateRoutes");
+const UserModel = require("../../models/User");
 
 /* - GET https://yourapi.herokuapp.com/api/posts/
 Retrieve posts */
@@ -143,5 +144,51 @@ postRouter.post(
     }
   }
 );
+
+//postRoutes.post('/like/:username')
+
+postRouter.post("/like/:id", auth, async (req, res, next) => {
+  try {
+    const likes = await Posts.findByIdAndUpdate(
+      req.params.id,
+      {
+        $addToSet: { likes: req.user.username },
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+    const liker = await UserModel.findByIdAndUpdate(req.user.id, {
+      $addToSet: { liked: req.params.id },
+    });
+    res.send({ likes });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+postRouter.put("/unlike/:id", auth, async (req, res, next) => {
+  try {
+    const unlike = await Posts.findByIdAndUpdate(
+      req.params.id,
+      {
+        $pull: { likes: req.user.username },
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+    const liker = await UserModel.findByIdAndUpdate(req.user.id, {
+      $pull: { liked: req.params.id },
+    });
+    res.send({ unlike });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
 
 module.exports = postRouter;

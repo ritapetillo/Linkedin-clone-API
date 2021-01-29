@@ -1,5 +1,5 @@
 const express = require("express");
-const ExperienceModel = require("../../models/Experiences");
+const ExperienceModel = require("../../models/experiences");
 const ApiError = require("../../classes/apiError");
 const experiencesRouter = express.Router();
 const schemas = require("../../lib/validation/validationSchema");
@@ -33,7 +33,7 @@ experiencesRouter.get("/:experienceId", async (req, res, next) => {
   }
 });
 
-experiencesRouter.get("/csv", async (req, res, next) => {
+experiencesRouter.get("/download/csv", async (req, res, next) => {
   try {
     res.writeHead(200, {
       "Content-Type": "text/csv",
