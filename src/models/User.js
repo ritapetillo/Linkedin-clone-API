@@ -41,7 +41,7 @@ const UserSchema = new Schema(
     image: {
       type: String,
     },
-    liked:[],
+    liked: [],
     skills: [{ type: mongoose.Schema.Types.ObjectId, ref: "Skills" }],
     experiences: [{ type: mongoose.Schema.Types.ObjectId, ref: "Experience" }],
     education: [{ type: mongoose.Schema.Types.ObjectId, ref: "Education" }],
@@ -61,8 +61,17 @@ UserSchema.pre("save", async function (next) {
     next(error);
   }
 });
-
-
+UserSchema.pre("findByIdAndUpdate", async function (next) {
+  if (!this.isModified("password")) return next();
+  try {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    const error = new Error("Password not valid");
+    next(error);
+  }
+});
 
 UserSchema.methods.comparePass = async function (pass) {
   try {
