@@ -3,7 +3,7 @@ const { TOKEN_SECRET } = process.env;
 const { RETOKEN_SECRET } = process.env;
 const RefreshToken = require("../../../models/RefreshToken");
 
-const refreshToken = async (req,res,next) => {
+const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
     const token = await RefreshToken.findOne({ token: refreshToken });
@@ -17,8 +17,9 @@ const refreshToken = async (req,res,next) => {
       // expires: new Date(Date.now() + expiration),
       secure: false, // set to true if your using https
       httpOnly: true,
+      sameSite: "none",
     });
-    next()
+    next();
   } catch (err) {
     console.log(err);
     const error = new Error("Unauthorized ");
