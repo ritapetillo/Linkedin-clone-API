@@ -53,13 +53,13 @@ educationRouter.post(
   async (req, res, next) => {
     const user = req.user;
     try {
-      const newEducation = new EducationModel(req.body);
-      newEducation.userId = user.id;
-      const { _id } = await newEducation.save();
+      const data = new EducationModel(req.body);
+      data.userId = user.id;
+      const { _id } = await data.save();
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { education: _id },
       });
-      res.status(201).json({ data:newEducation });
+      res.status(201).json({ data });
     } catch (error) {
       console.log(error);
       next(error);
@@ -79,7 +79,7 @@ educationRouter.post(
       if (!currentUser)
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const image = req.file && req.file.path;
-      const updateEducation = await EducationModel.findByIdAndUpdate(
+      const data = await EducationModel.findByIdAndUpdate(
         educationId,
         {
           $set: { image },
@@ -91,7 +91,7 @@ educationRouter.post(
       );
       res
         .status(201)
-        .json({ updateEducation });
+        .json({ data });
     } catch (error) {
       console.log(error);
       next(error);
@@ -110,7 +110,7 @@ educationRouter.put(
     try {
       if (educationToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const updatedEducation = await EducationModel.findByIdAndUpdate(
+      const data = await EducationModel.findByIdAndUpdate(
         educationId,
         req.body,
         {
@@ -118,7 +118,7 @@ educationRouter.put(
           new: true,
         }
       );
-      res.status(201).json({ data:educationToEdit });
+      res.status(201).json({ data });
     } catch (error) {
       console.log(error);
       next(error);

@@ -54,13 +54,13 @@ experiencesRouter.post(
   async (req, res, next) => {
     const user = req.user;
     try {
-      const newExperiences = new ExperienceModel(req.body);
-      newExperiences.userId = user.id;
-      const { _id } = await newExperiences.save();
+      const  data = new ExperienceModel(req.body);
+       data.userId = user.id;
+      const { _id } = await  data.save();
       const userModified = await UserModel.findByIdAndUpdate(user.id, {
         $push: { experiences: _id },
       });
-      res.status(201).json({ data:newExperiences });
+      res.status(201).json({ data });
     } catch (error) {
       console.log(error);
       next(error);
@@ -80,7 +80,7 @@ experiencesRouter.post(
       if (!currentUser)
         throw new ApiError(403, `Only the owner of this profile can edit`);
       const image = req.file && req.file.path;
-      const updateExperience = await ExperienceModel.findByIdAndUpdate(
+      const data = await ExperienceModel.findByIdAndUpdate(
         experienceId,
         { $set: { image } },
         {
@@ -90,7 +90,7 @@ experiencesRouter.post(
       );
       res
         .status(201)
-        .json({ data:updateExperience });
+        .json({ data });
     } catch (error) {
       console.log(error);
       next(error);
@@ -113,7 +113,7 @@ experiencesRouter.put(
     try {
       if (experienceToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const updatedExperience = await ExperienceModel.findByIdAndUpdate(
+      const data = await ExperienceModel.findByIdAndUpdate(
         experienceId,
         req.body,
         {
@@ -123,7 +123,7 @@ experiencesRouter.put(
       );
       res
         .status(201)
-        .json({ updatedExperience});
+        .json({ data });
     } catch (error) {
       console.log(error);
       next(error);
