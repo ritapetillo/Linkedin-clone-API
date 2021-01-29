@@ -13,7 +13,12 @@ server.enable("trust proxy");
 server.use(express.json());
 server.use(
   cors({
-    origin: [`${process.env.FRONT_URL}`, "http://localhost:3000"],
+    origin: [
+      `${process.env.FRONT_URL}`,
+      "http://localhost:3000",
+      "https://linkedin-clone-five.vercel.app",
+      "https://linkedin-clone-five.vercel.app",
+    ],
     credentials: true,
   })
 );
