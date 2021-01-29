@@ -28,7 +28,6 @@ postRouter.get("/", async (req, res, next) => {
   }
 });
 
-
 /* - POST https://yourapi.herokuapp.com/api/posts/
 Creates a new post */
 postRouter.post(
@@ -41,7 +40,7 @@ postRouter.post(
       const newPost = new Posts(req.body);
       newPost.userId = user.id;
       const { _id } = await newPost.save();
-      res.status(201).json({ data: `Post with ${_id} added` });
+      res.status(201).json({ _id });
     } catch (error) {
       console.log(error);
       next(error);
@@ -80,10 +79,10 @@ postRouter.put(
     const { id } = req.params;
     const user = req.user;
     const postToEdit = await Posts.findById(id);
-    
+
     try {
-      console.log("postToEdit.userId", postToEdit.userId)
-      console.log("user.id", user.id)
+      console.log("postToEdit.userId", postToEdit.userId);
+      console.log("user.id", user.id);
 
       if (postToEdit.userId != user.id)
         throw new ApiError(403, `Only the owner of this comment can edit`);
@@ -91,7 +90,8 @@ postRouter.put(
         runValidators: true,
         new: true,
       });
-      res.status(200).send({ updatedPost });
+      const { id } = updatedPost;
+      res.status(200).send({ updatedPost, _id });
     } catch (error) {
       console.log(error);
       next(error);
@@ -100,15 +100,13 @@ postRouter.put(
 );
 /* - DELETE https://yourapi.herokuapp.com/api/posts/{postId}
 Removes a post */
-postRouter.delete("/:postId", auth,
-validationMiddleware(schemas.PostSchema), async (req, res, next) => {
+postRouter.delete("/:postId", auth, async (req, res, next) => {
   const { postId } = req.params;
   const user = req.user;
   const postToDelete = await Posts.findById(postId);
   try {
-    
     if (postToDelete.userId != user.id)
-    throw new ApiError(403, `Only the owner of this comment can edit`);
+      throw new ApiError(403, `Only the owner of this comment can edit`);
     const removedPost = await Posts.findByIdAndDelete(postId);
     res.status(200).send("Deleted Post with Id: " + postId);
   } catch (error) {
@@ -118,20 +116,31 @@ validationMiddleware(schemas.PostSchema), async (req, res, next) => {
 });
 /* - POST https://yourapi.herokuapp.com/api/posts/{postId}
 Add an image to the post under the name of "post" */
-postRouter.post("/:id", postsParser.single("image"), async (req, res, next) => {
-  const { id } = req.params;
-  console.log(id);
-  try {
-    console.log("req.file", req.file);
-    const image = req.file && req.file.path;
-    const updatePosts = await Posts.findByIdAndUpdate(id, {
-      $push: { image },
-    });
-    res.status(201).json({ data: `Photo added to Post with ID ${id}` });
-  } catch (error) {
-    console.log(error);
-    next(error);
+postRouter.post(
+  "/:id/upload",
+  postsParser.single("image"),
+  async (req, res, next) => {
+    const { id } = req.params;
+    console.log(id);
+    try {
+      console.log("req.file", req.file);
+      const image = req.file && req.file.path;
+      const updatePosts = await Posts.findByIdAndUpdate(
+        id,
+        {
+          $set: { image },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+      res.status(201).json({ data: `Photo added to Post with ID ${id}` });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
   }
-});
+);
 
 module.exports = postRouter;
