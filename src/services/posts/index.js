@@ -90,7 +90,8 @@ postRouter.put(
         runValidators: true,
         new: true,
       });
-      const { id } = updatedPost;
+
+      const { _id } = updatedPost;
       res.status(200).send({ updatedPost, _id });
     } catch (error) {
       console.log(error);
