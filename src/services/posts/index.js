@@ -92,7 +92,12 @@ postRouter.put(
         runValidators: true,
         new: true,
       });
+<<<<<<< Updated upstream
       res.status(200).send({ updatedPost });
+=======
+      const { _id } = updatedPost;
+      res.status(200).send({ updatedPost, _id });
+>>>>>>> Stashed changes
     } catch (error) {
       console.log(error);
       next(error);
