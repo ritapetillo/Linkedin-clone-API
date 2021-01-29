@@ -9,6 +9,12 @@ const skillRoutes = require("../skills/index");
 const jwt = require("jsonwebtoken");
 const { TOKEN_SECRET } = process.env;
 const { RETOKEN_SECRET } = process.env;
+const puppeteer = require("puppeteer")
+const fs = require("fs-extra")
+const path = require("path")
+const moment= require("moment")
+const hbs = require("hbs")
+
 
 const auth = require("../../lib/utils/privateRoutes");
 const validation = require("../../lib/validation/validationMiddleware");
@@ -254,6 +260,45 @@ userRoutes.get("/:username", async (req, res, next) => {
     res.status(200).send({ user });
   } catch (err) {
     const error = new Error("There is no user with this id");
+  }
+});
+
+
+const compile = async function(templateName,user){
+  const filePath = path.join(process.cwd(),"/src/services/users/templates",`${templateName}.hbs`)
+  const html = await fs.readFile(filePath,"utf-8")
+  return hbs.compile(html)(user)
+}
+
+hbs.registerHelper("dateFormat",function(value,format){
+  return moment(value).format(format)
+})
+
+userRoutes.get("/user/:id/cv", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id).populate({ path: "experiences skills education"}).lean()
+    const browser = await puppeteer.launch()
+      const page = await browser.newPage()
+      const content = await compile("template",user)
+      await page.setContent(content)
+      await page.emulateMediaFeatures("screen")
+      await page.pdf({
+        path: path.join(process.cwd(), "CV2.pdf"),
+        format:"A4",
+        printBackground: true
+      })
+      await browser.close()
+      process.exit
+    if (user) {
+      res.send(user);
+    } else {
+      next(error);
+      console.log('something here')
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 });
 
