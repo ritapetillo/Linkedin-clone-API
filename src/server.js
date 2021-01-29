@@ -7,7 +7,7 @@ const apiRoutes = require("./services/index");
 const mongoose = require("mongoose");
 const listEndpoints = require("express-list-endpoints");
 const cookieParser = require("cookie-parser");
-
+server.set("trust proxy", 1);
 //MIDDLEWARES
 server.use(express.json());
 server.use(
