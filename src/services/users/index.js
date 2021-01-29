@@ -31,6 +31,24 @@ userRoutes.get("/", async (req, res, next) => {
   }
 });
 
+// GET /api/users/:id 
+// GET USER BY ID
+userRoutes.get("/user/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    if (user) {
+      res.send(user);
+    } else {
+      next(error);
+      console.log('something here')
+    }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
 //GET /api/users/me
 //GET MY PROFILE
 userRoutes.get("/me", auth, async (req, res, next) => {

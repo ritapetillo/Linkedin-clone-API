@@ -17,11 +17,10 @@ const schemas = {
   commentSchema: Joi.object().keys({
     _id: Joi.string(),
     text: Joi.string().required(),
-    userId: Joi.string().required(),
+    userId: Joi.string(),
     postId: Joi.string().required(),
     createdAt: Joi.date(),
     updatedAt: Joi.date(),
-
   }),
   experienceSchema: Joi.object().keys({
     _id: Joi.string(),
