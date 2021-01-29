@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const listEndpoints = require("express-list-endpoints");
 const cookieParser = require("cookie-parser");
 server.set("trust proxy", 1);
+server.enable("trust proxy");
 //MIDDLEWARES
 server.use(express.json());
 server.use(
