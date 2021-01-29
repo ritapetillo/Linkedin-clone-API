@@ -10,7 +10,7 @@ const auth = require("../../lib/utils/privateRoutes");
 
 experiencesRouter.get("/", async (req, res, next) => {
   try {
-    const experiences = await ExperienceModel.find();
+    const experiences = await ExperienceModel.find().sort([["createdAt", -1]]);
     res.send(experiences);
   } catch (error) {
     console.log(error);
