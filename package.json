@@ -39,6 +39,7 @@
     "node-error-handler": "^1.1.14",
     "nodemailer": "^6.4.17",
     "nodemailer-smtp-transport": "^2.7.4",
+    "os": "^0.1.1",
     "path": "^0.12.7",
     "puppeteer": "^5.5.0",
     "query-to-mongo": "^0.10.1"
