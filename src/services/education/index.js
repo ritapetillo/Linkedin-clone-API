@@ -10,7 +10,7 @@ const auth = require("../../lib/utils/privateRoutes");
 
 educationRouter.get("/", async (req, res, next) => {
   try {
-    const studies = await EducationModel.find().sort([["createdAt", -1]]);
+    const studies = await EducationModel.find().sort([["startYear", -1]]);
     res.send(studies);
   } catch (error) {
     console.log(error);
