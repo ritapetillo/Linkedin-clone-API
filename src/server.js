@@ -7,7 +7,8 @@ const apiRoutes = require("./services/index");
 const mongoose = require("mongoose");
 const listEndpoints = require("express-list-endpoints");
 const cookieParser = require("cookie-parser");
-
+server.set("trust proxy", 1);
+server.enable("trust proxy");
 //MIDDLEWARES
 server.use(express.json());
 server.use(
@@ -23,7 +24,6 @@ server.use("/api", apiRoutes);
 
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
-console.log(listEndpoints(server))
 
 //Connect to DB and server
 mongoose
