@@ -287,10 +287,17 @@ userRoutes.get("/user/:id/cv", async (req, res, next) => {
       await browser.close()
       process.exit
     if (user) {
+
+      // res.writeHead(200, {
+      //   "Content-Type": "application/pdf",
+      // "Content-Disposition": `attachment; filename=${user.username}_CV.pdf`,
+      // });
+
+      
       res.send("PDF created at "+ process.cwd() + `\\${user.username}_CV.pdf`);
     } else {
       next(error);
-      console.log('something here')
+      console.log(error)
     }
   } catch (error) {
     console.log(error);
