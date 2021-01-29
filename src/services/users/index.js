@@ -284,14 +284,14 @@ userRoutes.get("/user/:id/cv", async (req, res, next) => {
       await page.setContent(content)
       await page.emulateMediaFeatures("screen")
       await page.pdf({
-        path: path.join(process.cwd(), "CV2.pdf"),
+        path: path.join(process.cwd(), `${user.username}_CV.pdf`),
         format:"A4",
         printBackground: true
       })
       await browser.close()
       process.exit
     if (user) {
-      res.send(user);
+      res.send("PDF created at "+ process.cwd() + `\\${user.username}_CV.pdf`);
     } else {
       next(error);
       console.log('something here')
